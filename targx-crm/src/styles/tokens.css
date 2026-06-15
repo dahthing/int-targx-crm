@@ -1,0 +1,96 @@
+:root {
+  /* Primitivas — Azuis TargX */
+  --tx-blue-950: #0A1628;
+  --tx-blue-900: #0F2044;
+  --tx-blue-800: #1A3260;
+  --tx-blue-700: #1E4080;
+  --tx-blue-600: #2451A3;
+  --tx-blue-500: #3B6FD4;
+  --tx-blue-100: #D6E4FF;
+  --tx-blue-050: #EEF4FF;
+
+  /* Primitivas — Teal TargX */
+  --tx-teal-600: #00917A;
+  --tx-teal-500: #00B899;
+  --tx-teal-400: #33C9AE;
+  --tx-teal-100: #CCEDE9;
+  --tx-teal-050: #E8F8F6;
+
+  /* Primitivas — Neutros */
+  --tx-gray-950: #0D0F12;
+  --tx-gray-800: #1F2533;
+  --tx-gray-600: #4B5563;
+  --tx-gray-400: #9CA3AF;
+  --tx-gray-200: #E5E7EB;
+  --tx-gray-100: #F3F4F6;
+  --tx-gray-050: #F9FAFB;
+  --tx-white:    #FFFFFF;
+
+  /* Primitivas — Semânticos */
+  --tx-success:  #059669;
+  --tx-warning:  #D97706;
+  --tx-danger:   #DC2626;
+  --tx-info:     #2563EB;
+
+  /* Ouro — bónus e milestones */
+  --tx-gold:     #F59E0B;
+  --tx-gold-bg:  #FEF3C7;
+
+  /* Tokens semânticos — Backgrounds */
+  --bg-page:              var(--tx-gray-050);
+  --bg-surface:           var(--tx-white);
+  --bg-surface-2:         var(--tx-gray-100);
+  --bg-sidebar:           var(--tx-blue-950);
+  --bg-sidebar-item-hover:  var(--tx-blue-800);
+  --bg-sidebar-item-active: var(--tx-blue-700);
+
+  /* Tokens semânticos — Texto */
+  --text-primary:        var(--tx-gray-800);
+  --text-secondary:      var(--tx-gray-600);
+  --text-muted:          var(--tx-gray-400);
+  --text-on-dark:        var(--tx-white);
+  --text-on-dark-muted:  rgba(255,255,255,0.6);
+
+  /* Tokens semânticos — Bordas */
+  --border-subtle:   var(--tx-gray-200);
+  --border-default:  var(--tx-gray-200);
+  --border-strong:   var(--tx-gray-400);
+
+  /* Tokens semânticos — Acções */
+  --action-primary:       var(--tx-teal-500);
+  --action-primary-hover: var(--tx-teal-600);
+  --action-secondary:     var(--tx-blue-600);
+
+  /* Espaçamento / bordas */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+
+  /* Sombras */
+  --shadow-sm:   0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:   0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+  --shadow-lg:   0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+
+  /* Transições */
+  --transition-fast:   0.1s ease;
+  --transition-base:   0.15s ease;
+  --transition-slow:   0.3s ease;
+  --transition-spring: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Acessibilidade — reduzir movimento */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus ring global */
+:focus-visible {
+  outline: 2px solid var(--tx-teal-500);
+  outline-offset: 2px;
+}

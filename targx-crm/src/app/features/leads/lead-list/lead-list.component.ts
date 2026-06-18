@@ -193,7 +193,7 @@ function formatCurrency(value: number | null): string {
                           {{ formatCurrency(p['paid_amount']) }}
                         </td>
                         <td style="font-size:0.8125rem;color:var(--tx-gray-500)">
-                          {{ formatCurrency((p.contract_value ?? 0) - p['paid_amount']) }}
+                          {{ formatCurrency(p.contract_value - p['paid_amount']) }}
                         </td>
                         <td>
                           <span class="tx-badge" style="background:var(--tx-teal-100);color:var(--tx-teal-700)">Em curso</span>

@@ -72,7 +72,7 @@ interface ReportFile {
                         <span>{{ r.name }}</span>
                       </div>
                     </td>
-                    <td style="color:var(--tx-gray-500);font-size:0.8125rem">{{ formatSize(r.metadata?.size ?? 0) }}</td>
+                    <td style="color:var(--tx-gray-500);font-size:0.8125rem">{{ formatSize(r.metadata.size) }}</td>
                     <td style="color:var(--tx-gray-500);font-size:0.8125rem">{{ r.updated_at | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td>
                       <button class="tx-btn-secondary" style="padding:4px 12px;font-size:0.8125rem" (click)="download(r)">

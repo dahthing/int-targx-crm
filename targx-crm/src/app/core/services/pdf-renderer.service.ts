@@ -3,8 +3,9 @@ import type { QuoteWithPhases } from './quote.service';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
+type RendererPrimitive = string | number | boolean;
 interface RendererData {
-  [key: string]: string | number | boolean | RendererData | RendererData[] | undefined | null;
+  [key: string]: RendererPrimitive | RendererPrimitive[] | RendererData | RendererData[] | undefined | null;
 }
 
 interface ClientProfile {

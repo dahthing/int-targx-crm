@@ -41,11 +41,16 @@ export function detectRisks(
     const answer = answers[question.key];
     if (answer === undefined || answer === null) continue;
 
-    const numericAnswer = Number(answer);
     let conditionMet = false;
 
     if (trigger.condition === 'gte') {
-      conditionMet = numericAnswer >= trigger.value;
+      conditionMet = Number(answer) >= (trigger.value as number);
+    } else if (trigger.condition === 'lte') {
+      conditionMet = Number(answer) <= (trigger.value as number);
+    } else if (trigger.condition === 'eq') {
+      conditionMet = String(answer) === String(trigger.value);
+    } else if (trigger.condition === 'neq') {
+      conditionMet = String(answer) !== String(trigger.value);
     }
 
     if (!conditionMet) continue;

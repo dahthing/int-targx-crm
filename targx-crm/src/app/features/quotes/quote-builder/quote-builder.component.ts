@@ -321,6 +321,63 @@ interface EditablePhase {
               </div>
             </div>
 
+            <!-- Risk panel card -->
+            @if (detectedRisks().length > 0 || quote()?.has_blocking_risk) {
+              <div class="tx-card p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-body font-semibold text-[var(--tx-gray-950)] flex items-center gap-2">
+                    <i class="pi pi-exclamation-triangle text-[var(--tx-warning)]"></i>
+                    Riscos detectados
+                  </h3>
+                  <span class="font-mono text-body-sm text-[var(--tx-warning)]">
+                    ×{{ (quote()?.risk_multiplier_total ?? 1).toFixed(3) }}
+                  </span>
+                </div>
+                <div class="space-y-1 mb-3">
+                  @for (risk of detectedRisks(); track risk.key) {
+                    <div class="flex items-start gap-2 text-body-sm">
+                      <i class="pi mt-0.5 shrink-0"
+                        [class]="risk.is_blocking ? 'pi-ban text-[var(--tx-danger)]' : 'pi-exclamation-circle text-[var(--tx-warning)]'"></i>
+                      <div>
+                        <span class="font-medium text-[var(--tx-gray-950)]">{{ risk.name }}</span>
+                        <span class="text-[var(--tx-gray-500)] ml-1">(×{{ risk.multiplier.toFixed(2) }})</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+                @if (quote()?.has_blocking_risk && !quote()?.admin_risk_override) {
+                  <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
+                    <p class="text-body-sm text-[var(--tx-danger)] font-medium">
+                      <i class="pi pi-ban mr-1"></i>Risco bloqueante activo
+                    </p>
+                    <p class="text-body-sm text-[var(--tx-danger)] mt-1">A submissão está bloqueada. Apenas admin pode fazer override.</p>
+                  </div>
+                }
+                @if (quote()?.admin_risk_override) {
+                  <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
+                    <p class="text-body-sm text-amber-700 font-medium">
+                      <i class="pi pi-check-circle mr-1"></i>Override activo
+                    </p>
+                    @if (quote()?.admin_risk_notes) {
+                      <p class="text-body-sm text-amber-600 mt-1">{{ quote()!.admin_risk_notes }}</p>
+                    }
+                  </div>
+                }
+                @if (isAdmin() && quote()?.has_blocking_risk && !quote()?.admin_risk_override) {
+                  <div class="space-y-2">
+                    <label class="tx-form-label">Justificação do override *</label>
+                    <textarea class="tx-input w-full text-body-sm" rows="2"
+                      [(ngModel)]="riskOverrideNotes"
+                      placeholder="Motivo para aceitar o risco..."></textarea>
+                    <button class="tx-btn-secondary w-full text-body-sm" (click)="applyRiskOverride()"
+                      [disabled]="!riskOverrideNotes.trim()">
+                      <i class="pi pi-shield mr-1"></i>Aplicar override
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
             <!-- Actions card -->
             <div class="tx-card p-4 space-y-2">
               <button
@@ -334,13 +391,18 @@ interface EditablePhase {
               <button
                 class="tx-btn-primary w-full"
                 (click)="submitForReview()"
-                [disabled]="saving() || !margin().is_valid"
+                [disabled]="saving() || !margin().is_valid || (quote()?.has_blocking_risk && !quote()?.admin_risk_override)"
               >
                 Submeter para revisão
               </button>
               @if (!margin().is_valid && phases().length > 0) {
                 <p class="text-body-sm text-[var(--tx-danger)] text-center">
                   Margem insuficiente — não pode submeter.
+                </p>
+              }
+              @if (quote()?.has_blocking_risk && !quote()?.admin_risk_override) {
+                <p class="text-body-sm text-[var(--tx-danger)] text-center">
+                  Risco bloqueante — necessário override admin.
                 </p>
               }
             </div>
@@ -514,6 +576,16 @@ export class QuoteBuilderComponent implements OnInit {
   readonly phases = signal<EditablePhase[]>([]);
   readonly rateProfiles = signal<RateProfile[]>([]);
   readonly isAdmin = computed(() => this.#authService.role() === 'admin');
+
+  // Risk
+  riskOverrideNotes = '';
+
+  readonly detectedRisks = computed(() => {
+    const q = this.quote();
+    if (!q?.detected_risks) return [];
+    const risks = q.detected_risks as unknown as Array<{ key: string; name: string; multiplier: number; is_blocking: boolean }>;
+    return Array.isArray(risks) ? risks : [];
+  });
 
   // Discount
   discountPctValue = 0;
@@ -807,6 +879,22 @@ export class QuoteBuilderComponent implements OnInit {
       this.#messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível submeter.' });
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  async applyRiskOverride(): Promise<void> {
+    const q = this.quote();
+    if (!q || !this.riskOverrideNotes.trim()) return;
+    try {
+      await this.#supabase.from('quotes').update({
+        admin_risk_override: true,
+        admin_risk_notes: this.riskOverrideNotes.trim(),
+      }).eq('id', q.id);
+      this.quote.set({ ...q, admin_risk_override: true, admin_risk_notes: this.riskOverrideNotes.trim() });
+      this.riskOverrideNotes = '';
+      this.#messageService.add({ severity: 'success', summary: 'Override aplicado', detail: 'Risco bloqueante removido por admin.' });
+    } catch {
+      this.#messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível aplicar override.' });
     }
   }
 

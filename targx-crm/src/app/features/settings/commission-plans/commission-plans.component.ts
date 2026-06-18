@@ -5,6 +5,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastModule } from 'primeng/toast';
@@ -27,18 +28,42 @@ interface PlanWithDetails extends CommissionPlan {
   selector: 'app-commission-plans',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, ToastModule],
+  imports: [FormsModule, ToastModule, DecimalPipe],
   providers: [MessageService],
+  styles: [`
+    .plans-page { padding:24px; }
+    .plans-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+    .plans-list { display:flex; flex-direction:column; gap:16px; }
+    .plan-header { display:flex; align-items:center; justify-content:space-between; }
+    .plan-header-left { display:flex; align-items:center; gap:10px; }
+    .plan-expand-btn { width:24px; height:24px; display:flex; align-items:center; justify-content:center; border:none; background:none; cursor:pointer; color:var(--tx-gray-400); padding:0; transition:transform 0.15s ease; }
+    .plan-expand-btn.open { transform:rotate(90deg); }
+    .plan-body { margin-top:16px; padding-left:34px; }
+    .section-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .section-title { font-size:0.875rem; font-weight:600; color:var(--tx-gray-700); }
+    .drawer-overlay { position:fixed; inset:0; z-index:40; background:rgba(0,0,0,0.4); }
+    .drawer { position:fixed; top:0; right:0; height:100%; width:384px; z-index:50; display:flex; flex-direction:column; background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,0.15); }
+    .drawer-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--tx-gray-200); }
+    .drawer-title { font-size:1rem; font-weight:600; color:var(--tx-gray-900); }
+    .drawer-body { flex:1; padding:24px; display:flex; flex-direction:column; gap:16px; overflow-y:auto; }
+    .drawer-footer { padding:20px 24px; border-top:1px solid var(--tx-gray-200); display:flex; gap:12px; }
+    .drawer-footer button { flex:1; }
+    .form-field { display:flex; flex-direction:column; gap:6px; }
+    .badge-active { background:var(--tx-teal-100); color:var(--tx-teal-700); }
+    .badge-inactive { background:var(--tx-gray-100); color:var(--tx-gray-600); }
+  `],
   template: `
     <p-toast />
 
-    <div class="p-6">
-      <div class="flex items-center justify-between mb-6">
+    <div style="padding:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
         <div>
-          <h1 class="text-h2" style="color: var(--tx-gray-950)">Planos de Comissão</h1>
-          <p class="text-body-sm mt-1" style="color: var(--text-secondary)">Gerir planos, tiers e bónus anuais.</p>
+          <h1 class="page-title">Planos de Comissão</h1>
+          <p style="color:var(--tx-gray-500);font-size:0.875rem;margin-top:4px">Gerir planos, tiers e bónus anuais.</p>
         </div>
-        <button class="tx-btn-primary" (click)="openNewPlan()">+ Novo plano</button>
+        <button class="tx-btn-primary" (click)="openNewPlan()">
+          <i class="pi pi-plus"></i>Novo plano
+        </button>
       </div>
 
       @if (loading()) {
@@ -50,41 +75,39 @@ interface PlanWithDetails extends CommissionPlan {
           Nenhum plano criado ainda.
         </div>
       } @else {
-        <div class="flex flex-col gap-4">
+        <div style="display:flex;flex-direction:column;gap:16px">
           @for (plan of plans(); track plan.id) {
             <div class="tx-card">
-              <!-- Plan header -->
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;align-items:center;gap:10px">
                   <button
-                    class="w-6 h-6 flex items-center justify-center transition-transform"
-                    [class.rotate-90]="plan.expanded"
+                    class="plan-expand-btn"
+                    [class.open]="plan.expanded"
                     (click)="toggleExpand(plan)"
                     [attr.aria-label]="plan.expanded ? 'Recolher' : 'Expandir'"
                   >
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
+                    <i class="pi pi-chevron-right" style="font-size:0.75rem"></i>
                   </button>
-                  <h2 class="text-h3">{{ plan.name }}</h2>
+                  <h2 style="font-size:1rem;font-weight:600;color:var(--tx-gray-900)">{{ plan.name }}</h2>
                   @if (plan.active) {
-                    <span class="tx-badge" style="background: var(--tx-teal-100); color: var(--tx-teal-700)">Activo</span>
+                    <span class="tx-badge" style="background:var(--tx-teal-100);color:var(--tx-teal-700)">Activo</span>
                   } @else {
-                    <span class="tx-badge" style="background: var(--tx-gray-100); color: var(--tx-gray-600)">Inactivo</span>
+                    <span class="tx-badge" style="background:var(--tx-gray-100);color:var(--tx-gray-600)">Inactivo</span>
                   }
                 </div>
               </div>
 
               @if (plan.expanded) {
-                <div class="mt-4 pl-9">
-                  <!-- Tiers -->
-                  <div class="mb-4">
-                    <div class="flex items-center justify-between mb-2">
-                      <h3 class="text-body font-semibold" style="color: var(--tx-gray-700)">Tiers de volume</h3>
-                      <button class="tx-btn-ghost text-sm" (click)="openAddTier(plan)">+ Adicionar tier</button>
+                <div style="margin-top:16px;padding-left:34px">
+                  <div style="margin-bottom:20px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                      <span style="font-size:0.875rem;font-weight:600;color:var(--tx-gray-700)">Tiers de volume</span>
+                      <button class="tx-btn-ghost" style="font-size:0.8125rem" (click)="openAddTier(plan)">
+                        <i class="pi pi-plus"></i>Adicionar tier
+                      </button>
                     </div>
                     @if (plan.tiers.length === 0) {
-                      <p class="text-body-sm" style="color: var(--text-muted)">Sem tiers definidos.</p>
+                      <p style="font-size:0.8125rem;color:var(--tx-gray-400)">Sem tiers definidos.</p>
                     } @else {
                       <table class="tx-table w-full text-sm">
                         <thead>
@@ -122,14 +145,15 @@ interface PlanWithDetails extends CommissionPlan {
                     }
                   </div>
 
-                  <!-- Bonuses -->
                   <div>
-                    <div class="flex items-center justify-between mb-2">
-                      <h3 class="text-body font-semibold" style="color: var(--tx-gray-700)">Bónus anuais</h3>
-                      <button class="tx-btn-ghost text-sm" (click)="openAddBonus(plan)">+ Adicionar bónus</button>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                      <span style="font-size:0.875rem;font-weight:600;color:var(--tx-gray-700)">Bónus anuais</span>
+                      <button class="tx-btn-ghost" style="font-size:0.8125rem" (click)="openAddBonus(plan)">
+                        <i class="pi pi-plus"></i>Adicionar bónus
+                      </button>
                     </div>
                     @if (plan.bonuses.length === 0) {
-                      <p class="text-body-sm" style="color: var(--text-muted)">Sem bónus definidos.</p>
+                      <p style="font-size:0.8125rem;color:var(--tx-gray-400)">Sem bónus definidos.</p>
                     } @else {
                       <table class="tx-table w-full text-sm">
                         <thead>
@@ -174,102 +198,87 @@ interface PlanWithDetails extends CommissionPlan {
 
     <!-- Drawer: New Plan -->
     @if (showPlanDrawer()) {
-      <div class="fixed inset-0 z-40" style="background: rgba(0,0,0,0.4)" (click)="closePlanDrawer()"></div>
-      <div class="fixed top-0 right-0 h-full w-96 z-50 flex flex-col"
-           style="background: var(--surface-card); box-shadow: -4px 0 24px rgba(0,0,0,0.15)">
-        <div class="flex items-center justify-between p-6 border-b" style="border-color: var(--tx-gray-200)">
-          <h3 class="text-h3">Novo Plano</h3>
-          <button class="tx-btn-ghost p-1" (click)="closePlanDrawer()" aria-label="Fechar">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
+      <div class="drawer-overlay" (click)="closePlanDrawer()"></div>
+      <div class="drawer">
+        <div class="drawer-header">
+          <span class="drawer-title">Novo Plano</span>
+          <button class="tx-btn-ghost" (click)="closePlanDrawer()" aria-label="Fechar"><i class="pi pi-times"></i></button>
         </div>
-        <div class="flex-1 p-6 flex flex-col gap-4">
-          <div class="tx-field">
+        <div class="drawer-body">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <label class="tx-form-label" for="plan-name">Nome do plano *</label>
             <input id="plan-name" type="text" class="tx-input" [(ngModel)]="newPlanName" placeholder="Ex: Plano Standard 2026" />
           </div>
-          <div class="flex items-center gap-3">
-            <input type="checkbox" id="plan-active" [(ngModel)]="newPlanActive" class="w-4 h-4" />
-            <label for="plan-active" class="tx-form-label cursor-pointer">Activo</label>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input type="checkbox" id="plan-active" [(ngModel)]="newPlanActive" style="width:16px;height:16px" />
+            <label for="plan-active" class="tx-form-label" style="cursor:pointer;margin:0">Activo</label>
           </div>
         </div>
-        <div class="p-6 border-t flex gap-3" style="border-color: var(--tx-gray-200)">
-          <button class="tx-btn-secondary flex-1" (click)="closePlanDrawer()">Cancelar</button>
-          <button class="tx-btn-primary flex-1" (click)="savePlan()" [disabled]="!newPlanName.trim() || saving()">Criar</button>
+        <div class="drawer-footer">
+          <button class="tx-btn-secondary" (click)="closePlanDrawer()">Cancelar</button>
+          <button class="tx-btn-primary" (click)="savePlan()" [disabled]="!newPlanName.trim() || saving()">Criar</button>
         </div>
       </div>
     }
 
     <!-- Drawer: Add Tier -->
     @if (showTierDrawer()) {
-      <div class="fixed inset-0 z-40" style="background: rgba(0,0,0,0.4)" (click)="closeTierDrawer()"></div>
-      <div class="fixed top-0 right-0 h-full w-96 z-50 flex flex-col"
-           style="background: var(--surface-card); box-shadow: -4px 0 24px rgba(0,0,0,0.15)">
-        <div class="flex items-center justify-between p-6 border-b" style="border-color: var(--tx-gray-200)">
-          <h3 class="text-h3">Adicionar Tier</h3>
-          <button class="tx-btn-ghost p-1" (click)="closeTierDrawer()" aria-label="Fechar">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
+      <div class="drawer-overlay" (click)="closeTierDrawer()"></div>
+      <div class="drawer">
+        <div class="drawer-header">
+          <span class="drawer-title">Adicionar Tier</span>
+          <button class="tx-btn-ghost" (click)="closeTierDrawer()" aria-label="Fechar"><i class="pi pi-times"></i></button>
         </div>
-        <div class="flex-1 p-6 flex flex-col gap-4">
-          <div class="tx-field">
+        <div class="drawer-body">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <label class="tx-form-label" for="tier-label">Label</label>
             <input id="tier-label" type="text" class="tx-input" [(ngModel)]="tierForm.label" placeholder="Ex: Bronze" />
           </div>
-          <div class="tx-field">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <label class="tx-form-label" for="tier-from">De (€) *</label>
             <input id="tier-from" type="number" class="tx-input" [(ngModel)]="tierForm.volume_from" min="0" />
           </div>
-          <div class="tx-field">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <label class="tx-form-label" for="tier-to">Até (€) — deixar vazio para ilimitado</label>
             <input id="tier-to" type="number" class="tx-input" [(ngModel)]="tierForm.volume_to" min="0" />
           </div>
-          <div class="tx-field">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <label class="tx-form-label" for="tier-rate">Taxa (%) *</label>
             <input id="tier-rate" type="number" class="tx-input" [(ngModel)]="tierForm.rate_percent" min="0" max="100" step="0.1" />
           </div>
         </div>
-        <div class="p-6 border-t flex gap-3" style="border-color: var(--tx-gray-200)">
-          <button class="tx-btn-secondary flex-1" (click)="closeTierDrawer()">Cancelar</button>
-          <button class="tx-btn-primary flex-1" (click)="saveTier()" [disabled]="saving()">Guardar</button>
+        <div class="drawer-footer">
+          <button class="tx-btn-secondary" (click)="closeTierDrawer()">Cancelar</button>
+          <button class="tx-btn-primary" (click)="saveTier()" [disabled]="saving()">Guardar</button>
         </div>
       </div>
     }
 
     <!-- Drawer: Add Bonus -->
     @if (showBonusDrawer()) {
-      <div class="fixed inset-0 z-40" style="background: rgba(0,0,0,0.4)" (click)="closeBonusDrawer()"></div>
-      <div class="fixed top-0 right-0 h-full w-96 z-50 flex flex-col"
-           style="background: var(--surface-card); box-shadow: -4px 0 24px rgba(0,0,0,0.15)">
-        <div class="flex items-center justify-between p-6 border-b" style="border-color: var(--tx-gray-200)">
-          <h3 class="text-h3">Adicionar Bónus</h3>
-          <button class="tx-btn-ghost p-1" (click)="closeBonusDrawer()" aria-label="Fechar">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
+      <div class="drawer-overlay" (click)="closeBonusDrawer()"></div>
+      <div class="drawer">
+        <div class="drawer-header">
+          <span class="drawer-title">Adicionar Bónus</span>
+          <button class="tx-btn-ghost" (click)="closeBonusDrawer()" aria-label="Fechar"><i class="pi pi-times"></i></button>
         </div>
-        <div class="flex-1 p-6 flex flex-col gap-4">
-          <div class="tx-field">
+        <div class="drawer-body">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <label class="tx-form-label" for="bonus-threshold">Threshold (€) *</label>
             <input id="bonus-threshold" type="number" class="tx-input" [(ngModel)]="bonusForm.threshold" min="0" />
           </div>
-          <div class="tx-field">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <label class="tx-form-label" for="bonus-amount">Valor bónus (€) *</label>
             <input id="bonus-amount" type="number" class="tx-input" [(ngModel)]="bonusForm.bonus_amount" min="0" />
           </div>
-          <div class="tx-field">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <label class="tx-form-label" for="bonus-desc">Descrição</label>
             <input id="bonus-desc" type="text" class="tx-input" [(ngModel)]="bonusForm.description" placeholder="Opcional" />
           </div>
         </div>
-        <div class="p-6 border-t flex gap-3" style="border-color: var(--tx-gray-200)">
-          <button class="tx-btn-secondary flex-1" (click)="closeBonusDrawer()">Cancelar</button>
-          <button class="tx-btn-primary flex-1" (click)="saveBonus()" [disabled]="saving()">Guardar</button>
+        <div class="drawer-footer">
+          <button class="tx-btn-secondary" (click)="closeBonusDrawer()">Cancelar</button>
+          <button class="tx-btn-primary" (click)="saveBonus()" [disabled]="saving()">Guardar</button>
         </div>
       </div>
     }
@@ -457,7 +466,7 @@ export class CommissionPlansComponent implements OnInit {
   }
 
   async deleteBonus(plan: PlanWithDetails, bonus: CommissionBonus): Promise<void> {
-    if (!confirm(`Eliminar bónus de €${bonus.bonus_amount}?`)) return;
+    if (!confirm(`Eliminar bónus de ${bonus.bonus_amount}€?`)) return;
 
     const { error } = await this.#supabase
       .from('commission_bonuses')

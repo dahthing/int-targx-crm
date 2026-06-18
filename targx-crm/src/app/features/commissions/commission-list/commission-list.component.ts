@@ -12,7 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { from } from 'rxjs';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../core/services/auth.service';
@@ -50,14 +50,19 @@ function formatDate(iso: string): string {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [MessageService],
-  imports: [TableModule, ButtonModule, DropdownModule, FormsModule, ToastModule],
+  imports: [TableModule, ButtonModule, SelectModule, FormsModule, ToastModule],
+  styles: [`
+    .commissions-page { padding:24px; }
+    .commissions-header { margin-bottom:24px; }
+    .commissions-filters { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; padding:16px; }
+    .commissions-filter-actions { display:flex; align-items:flex-end; gap:8px; }
+  `],
   template: `
     <p-toast />
 
-    <div class="p-6">
-      <!-- Header -->
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-h2" style="color: var(--text-primary)">Comissões</h1>
+    <div class="commissions-page">
+      <div class="commissions-header">
+        <h1 class="page-title">Comissões</h1>
       </div>
 
       <!-- KPI Summary -->
@@ -87,12 +92,11 @@ function formatDate(iso: string): string {
         </div>
       }
 
-      <!-- Filters -->
-      <div class="tx-card" style="margin-bottom: 24px">
-        <div class="flex gap-4 flex-wrap" style="padding: 16px">
+      <div class="tx-card" style="margin-bottom:24px">
+        <div class="commissions-filters">
           <div>
             <label class="tx-form-label">Ano</label>
-            <p-dropdown
+            <p-select
               [options]="yearOptions"
               [(ngModel)]="selectedYear"
               optionLabel="label"
@@ -104,7 +108,7 @@ function formatDate(iso: string): string {
 
           <div>
             <label class="tx-form-label">Mês</label>
-            <p-dropdown
+            <p-select
               [options]="monthOptions"
               [(ngModel)]="selectedMonth"
               optionLabel="label"
@@ -116,7 +120,7 @@ function formatDate(iso: string): string {
             />
           </div>
 
-          <div class="flex items-end gap-2">
+          <div class="commissions-filter-actions">
             <button
               class="tx-btn-ghost"
               [disabled]="commissions().length === 0"
@@ -144,16 +148,14 @@ function formatDate(iso: string): string {
         </div>
       </div>
 
-      <!-- Commission Table -->
       <div class="tx-card">
-        <div class="tx-table">
-          <p-table
+        <p-table
             [value]="commissions()"
             [loading]="loading()"
             [rows]="25"
             [paginator]="true"
             [rowHover]="true"
-            styleClass="p-datatable-sm"
+            styleClass="tx-table"
           >
             <ng-template pTemplate="header">
               <tr>
@@ -211,7 +213,6 @@ function formatDate(iso: string): string {
               </tr>
             </ng-template>
           </p-table>
-        </div>
       </div>
     </div>
   `,

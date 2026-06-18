@@ -4,16 +4,13 @@ import {
   inject,
   OnInit,
   signal,
-  computed,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TableModule } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { QuoteService } from '../../../core/services/quote.service';
-import { AuthService } from '../../../core/services/auth.service';
 import type { Quote, QuoteStatus } from '../../../core/models/quote.model';
 
 interface StatusOption {
@@ -25,28 +22,43 @@ interface StatusOption {
   selector: 'app-quote-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TableModule, SelectModule, ButtonModule],
+  imports: [FormsModule, TableModule, SelectModule, ButtonModule],
+  styles: [`
+    .quotes-page { padding: 24px; }
+    .quotes-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+    .quotes-filter { margin-bottom:16px; }
+    .col-title { font-weight:500; color:var(--tx-gray-800); }
+    .col-meta { color:var(--tx-gray-500); font-size:0.8125rem; }
+    .col-amount { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; color:var(--tx-gray-800); }
+    .col-date { color:var(--tx-gray-400); font-size:0.8125rem; }
+    .tx-badge-gray   { background:var(--tx-gray-100); color:var(--tx-gray-700); }
+    .tx-badge-blue   { background:#DBEAFE; color:#1D4ED8; }
+    .tx-badge-teal   { background:#CCFBF1; color:#0F766E; }
+    .tx-badge-gold   { background:#FEF9C3; color:#854D0E; }
+    .tx-badge-green  { background:#DCFCE7; color:#15803D; }
+    .tx-badge-red    { background:#FEE2E2; color:#B91C1C; }
+  `],
   template: `
-    <div class="tx-page-content">
+    <div class="quotes-page">
+      <div class="quotes-header">
+        <h1 class="page-title">Orçamentos</h1>
+        <button class="tx-btn-primary" (click)="newQuote()">
+          <i class="pi pi-plus" style="margin-right:6px"></i>Novo orçamento
+        </button>
+      </div>
+
       <div class="tx-card">
-        <div class="tx-card-header">
-          <div class="flex items-center justify-between">
-            <h1 class="text-h2">Orçamentos</h1>
-            <button class="tx-btn-primary" (click)="newQuote()">
-              <i class="pi pi-plus mr-2"></i>Novo orçamento
-            </button>
-          </div>
-          <div class="mt-4">
-            <p-select
-              [options]="statusOptions"
-              [(ngModel)]="selectedStatus"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Filtrar por estado"
-              (onChange)="onStatusChange()"
-              styleClass="w-64"
-            />
-          </div>
+        <div class="quotes-filter">
+          <p-select
+            [options]="statusOptions"
+            [(ngModel)]="selectedStatus"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Filtrar por estado"
+            (onChange)="onStatusChange()"
+            styleClass="tx-input"
+            style="width:260px"
+          />
         </div>
 
         <p-table
@@ -55,43 +67,34 @@ interface StatusOption {
           [loading]="loading()"
           [paginator]="true"
           [rows]="20"
-          (onRowSelect)="onRowClick($event)"
-          selectionMode="single"
+          [rowHover]="true"
         >
           <ng-template pTemplate="header">
             <tr>
               <th>Título</th>
-              <th>Cliente</th>
-              @if (isAdmin()) {
-                <th>Parceiro</th>
-              }
               <th>Estado</th>
-              <th class="text-right">Valor</th>
+              <th style="text-align:right">Valor</th>
               <th>Data</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-quote>
-            <tr class="cursor-pointer hover:bg-[var(--tx-gray-050)]" (click)="onRowClick(quote)">
-              <td>{{ quote.title }}</td>
-              <td>{{ quote.client_id }}</td>
-              @if (isAdmin()) {
-                <td>{{ quote.partner_id }}</td>
-              }
+            <tr style="cursor:pointer" (click)="onRowClick(quote)">
+              <td><span class="col-title">{{ quote.title }}</span></td>
               <td>
-                <span class="tx-badge" [ngClass]="statusClass(quote.status)">
+                <span class="tx-badge" [class]="statusClass(quote.status)">
                   {{ statusLabel(quote.status) }}
                 </span>
               </td>
-              <td class="text-right font-mono">
-                {{ formatCurrency(quote.total_before_tax) }}
-              </td>
-              <td>{{ formatDate(quote.created_at) }}</td>
+              <td class="col-amount">{{ formatCurrency(quote.total_before_tax) }}</td>
+              <td class="col-date">{{ formatDate(quote.created_at) }}</td>
             </tr>
           </ng-template>
           <ng-template pTemplate="emptymessage">
             <tr>
-              <td [attr.colspan]="isAdmin() ? 6 : 5" class="text-center py-8 text-[var(--tx-gray-400)]">
-                Nenhum orçamento encontrado.
+              <td colspan="4">
+                <div class="empty-state">
+                  <span>Nenhum orçamento encontrado.</span>
+                </div>
               </td>
             </tr>
           </ng-template>
@@ -102,12 +105,10 @@ interface StatusOption {
 })
 export class QuoteListComponent implements OnInit {
   readonly #quoteService = inject(QuoteService);
-  readonly #authService = inject(AuthService);
   readonly #router = inject(Router);
 
   readonly quotes = signal<Quote[]>([]);
   readonly loading = signal(false);
-  readonly isAdmin = computed(() => this.#authService.role() === 'admin');
 
   selectedStatus: QuoteStatus | null = null;
 

@@ -185,6 +185,10 @@ export interface QuoteItem {
   updated_at: string;
 }
 
+export interface QuoteWithPhases extends Quote {
+  phases: Array<QuotePhase & { items: QuoteItem[] }>;
+}
+
 export interface QuoteStatusHistory {
   id: string;
   quote_id: string;

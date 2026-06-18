@@ -29,6 +29,7 @@ export interface PipelineGroup {
   status: string;
   count: number;
   value_total: number;
+  leads?: { id: string; title: string; client_name?: string | null }[];
 }
 
 export interface PartnerOverviewItem {

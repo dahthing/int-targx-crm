@@ -1,7 +1,8 @@
 export const environment = {
   production: true,
-  supabaseUrl: process.env['SUPABASE_URL'] ?? '',
-  supabaseAnonKey: process.env['SUPABASE_ANON_KEY'] ?? '',
-  appUrl: process.env['APP_URL'] ?? 'https://crm.targx.com',
-  clientPortalBaseUrl: process.env['CLIENT_PORTAL_BASE_URL'] ?? 'https://crm.targx.com/client/quotes',
+  supabaseUrl: import.meta.env['NG_APP_SUPABASE_URL'] ?? '',
+  supabaseAnonKey: import.meta.env['NG_APP_SUPABASE_ANON_KEY'] ?? '',
+  appUrl: import.meta.env['NG_APP_URL'] ?? 'https://crm.targx.com',
+  clientPortalBaseUrl:
+    import.meta.env['NG_APP_CLIENT_PORTAL_BASE_URL'] ?? 'https://crm.targx.com/client/quotes',
 };

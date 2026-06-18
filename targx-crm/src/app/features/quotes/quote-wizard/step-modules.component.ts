@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { CheckboxModule } from 'primeng/checkbox';
 import { SUPABASE_CLIENT } from '../../../core/supabase/supabase.client';
 import { evaluateAnswers } from '../../../core/services/scoping-engine.functions';
-import type { ProjectType, ScopingQuestion, CatalogItem } from '../../../core/models/quote.model';
+import type { ProjectType, ScopingQuestion, CatalogItem, RateProfile } from '../../../core/models/quote.model';
 import type { ScopingAnswers } from '../../../core/services/scoping-engine.functions';
 
 @Component({
@@ -94,6 +94,7 @@ export class StepModulesComponent implements OnInit {
   readonly projectType = input.required<ProjectType>();
   readonly answers = input.required<ScopingAnswers>();
   readonly questions = input.required<ScopingQuestion[]>();
+  readonly rateProfiles = input<RateProfile[]>([]);
   readonly selectionChanged = output<{ activated: CatalogItem[]; optionals: CatalogItem[] }>();
 
   readonly allCatalogItems = signal<CatalogItem[]>([]);
@@ -114,24 +115,27 @@ export class StepModulesComponent implements OnInit {
   );
 
   readonly estimatedTotal = computed(() => {
-    const base = this.activatedModules().reduce((acc, item) => {
+    const calcItem = (item: CatalogItem): number => {
       if (item.pricing_type === 'hourly') {
-        return acc + (item.default_hours ?? 0) * 75; // fallback rate
+        const rate = this.#resolveRate(item.default_rate_profile_id);
+        return (item.default_hours ?? 0) * rate;
       }
-      return acc + (item.default_value ?? 0);
-    }, 0);
+      return item.default_value ?? 0;
+    };
 
+    const base = this.activatedModules().reduce((acc, item) => acc + calcItem(item), 0);
     const optionals = this.optionalItems()
       .filter(item => this.selectedOptionals.includes(item.id))
-      .reduce((acc, item) => {
-        if (item.pricing_type === 'hourly') {
-          return acc + (item.default_hours ?? 0) * 75;
-        }
-        return acc + (item.default_value ?? 0);
-      }, 0);
+      .reduce((acc, item) => acc + calcItem(item), 0);
 
     return base + optionals;
   });
+
+  #resolveRate(profileId: string | null): number {
+    if (!profileId) return 75;
+    const profile = this.rateProfiles().find(rp => rp.id === profileId);
+    return profile?.hourly_rate ?? 75;
+  }
 
   ngOnInit(): void {
     this.#supabase

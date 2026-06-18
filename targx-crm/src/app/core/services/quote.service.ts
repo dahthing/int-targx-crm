@@ -40,7 +40,7 @@ export type QuoteWithPhases = Quote & {
 export class QuoteService {
   readonly #supabase = inject(SUPABASE_CLIENT);
 
-  getAll(filters?: { partner_id?: string; status?: QuoteStatus }): Observable<Quote[]> {
+  getAll(filters?: { partner_id?: string; client_id?: string; lead_id?: string; status?: QuoteStatus }): Observable<Quote[]> {
     return from(
       (async () => {
         let query = this.#supabase
@@ -50,6 +50,12 @@ export class QuoteService {
 
         if (filters?.partner_id) {
           query = query.eq('partner_id', filters.partner_id);
+        }
+        if (filters?.client_id) {
+          query = query.eq('client_id', filters.client_id);
+        }
+        if (filters?.lead_id) {
+          query = query.eq('lead_id', filters.lead_id);
         }
         if (filters?.status) {
           query = query.eq('status', filters.status);

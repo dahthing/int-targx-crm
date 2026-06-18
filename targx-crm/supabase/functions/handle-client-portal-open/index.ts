@@ -50,15 +50,30 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     const quote = quoteData as QuoteRow;
 
-    // Only send notification on first open (count === 1 after increment in Angular service)
+    // Always log the access; only send email on first open
+    const ipAddress = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? null;
+    const userAgent = req.headers.get('user-agent') ?? null;
+
+    const { error: earlyLogError } = await supabase.from('portal_access_log').insert({
+      quote_id: quoteId,
+      action: 'open',
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      metadata: { open_count: quote.portal_open_count },
+    });
+
+    if (earlyLogError) {
+      console.error('[handle-client-portal-open] Failed to insert portal_access_log:', earlyLogError.message);
+    }
+
     if (quote.portal_open_count !== 1) {
       return new Response(
-        JSON.stringify({ skipped: true, reason: 'Not first open' }),
+        JSON.stringify({ logged: true, skipped_email: true, reason: 'Not first open' }),
         { status: 200, headers: { 'Content-Type': 'application/json' } },
       );
     }
 
-    // Check deduplication
+    // Check deduplication for email
     const eventKey = `portal_opened_${quoteId}`;
     const { data: existingLog } = await supabase
       .from('email_logs')

@@ -80,7 +80,20 @@ export class ProjectService {
           .select()
           .single();
         if (error) throw error;
-        return data as ProjectTranche;
+        const tranche = data as ProjectTranche;
+
+        // Trigger commission calculation or removal
+        if (received) {
+          await this.#supabase.functions.invoke('calculate-commission', {
+            body: { trancheId: id },
+          });
+        } else {
+          await this.#supabase.functions.invoke('remove-commission', {
+            body: { trancheId: id },
+          });
+        }
+
+        return tranche;
       })()
     );
   }
@@ -126,5 +139,23 @@ export class ProjectService {
         if (updateErr) throw updateErr;
       })()
     );
+  }
+
+  async create(data: {
+    title: string;
+    client_id: string;
+    partner_id: string;
+    contract_value: number;
+    contract_date: string;
+    description?: string;
+    created_by: string;
+  }): Promise<Project> {
+    const { data: created, error } = await this.#supabase
+      .from('projects')
+      .insert({ ...data, status: 'em_curso' })
+      .select('*')
+      .single();
+    if (error) throw error;
+    return created as Project;
   }
 }

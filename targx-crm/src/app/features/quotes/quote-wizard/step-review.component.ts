@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  inject,
   output,
   signal,
   input,
@@ -10,10 +9,9 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
-import { detectRisks } from '../../../core/services/risk-engine.functions';
+import { detectRisks, calculateTotalMultiplier, hasBlockingRisk as checkBlockingRisk } from '../../../core/services/risk-engine.functions';
 import { calculateQuoteTotals } from '../../../core/services/quote-calculator.functions';
-import { SUPABASE_CLIENT } from '../../../core/supabase/supabase.client';
-import type { ProjectType, ScopingQuestion, CatalogItem, RiskMultiplier } from '../../../core/models/quote.model';
+import type { ProjectType, ScopingQuestion, CatalogItem, RiskMultiplier, RateProfile } from '../../../core/models/quote.model';
 import type { ScopingAnswers } from '../../../core/services/scoping-engine.functions';
 import type { DetectedRisk } from '../../../core/services/risk-engine.functions';
 
@@ -25,6 +23,8 @@ export interface ReviewSubmitPayload {
   hasBlockingRisk: boolean;
   activatedModules: CatalogItem[];
   optionalModules: CatalogItem[];
+  /** map of catalogItem.id → resolved hourly_rate (for saving to quote_items) */
+  resolvedRates: Record<string, number>;
 }
 
 @Component({
@@ -143,31 +143,40 @@ export interface ReviewSubmitPayload {
   `,
 })
 export class StepReviewComponent {
-  readonly #supabase = inject(SUPABASE_CLIENT);
-
   readonly projectType = input.required<ProjectType>();
   readonly answers = input.required<ScopingAnswers>();
   readonly questions = input.required<ScopingQuestion[]>();
   readonly activatedModules = input.required<CatalogItem[]>();
   readonly optionalModules = input.required<CatalogItem[]>();
+  readonly riskMultipliers = input<RiskMultiplier[]>([]);
+  readonly rateProfiles = input<RateProfile[]>([]);
   readonly submitClicked = output<ReviewSubmitPayload>();
 
   readonly submitting = signal(false);
   readonly error = signal<string | null>(null);
   title = '';
 
-  readonly risks = computed<DetectedRisk[]>(() => {
-    // We'd need risk multipliers from DB; for now return empty (loaded in parent)
-    return [];
-  });
-
-  readonly riskMultiplierTotal = computed(() =>
-    this.risks().reduce((acc, r) => acc * r.multiplier, 1)
+  readonly risks = computed<DetectedRisk[]>(() =>
+    detectRisks(this.answers(), this.questions(), this.riskMultipliers())
   );
 
-  readonly hasBlockingRisk = computed(() => this.risks().some(r => r.is_blocking));
+  readonly riskMultiplierTotal = computed(() => calculateTotalMultiplier(this.risks()));
+
+  readonly hasBlockingRisk = computed(() => checkBlockingRisk(this.risks()));
+
+  readonly resolvedRates = computed<Record<string, number>>(() => {
+    const profiles = this.rateProfiles();
+    const allItems = [...this.activatedModules(), ...this.optionalModules()];
+    return Object.fromEntries(
+      allItems.map(item => {
+        const profile = profiles.find(rp => rp.id === item.default_rate_profile_id);
+        return [item.id, profile?.hourly_rate ?? 75];
+      })
+    );
+  });
 
   readonly totals = computed(() => {
+    const rates = this.resolvedRates();
     const allItems = [...this.activatedModules(), ...this.optionalModules()].map((item, i) => ({
       id: `tmp-${i}`,
       phase_id: 'tmp',
@@ -177,7 +186,7 @@ export class StepReviewComponent {
       pricing_type: item.pricing_type,
       hours: item.default_hours,
       rate_profile_id: item.default_rate_profile_id,
-      hourly_rate: 75,
+      hourly_rate: rates[item.id] ?? 75,
       unit_value: item.default_value,
       quantity: 1,
       item_order: i + 1,
@@ -211,6 +220,7 @@ export class StepReviewComponent {
       hasBlockingRisk: this.hasBlockingRisk(),
       activatedModules: this.activatedModules(),
       optionalModules: this.optionalModules(),
+      resolvedRates: this.resolvedRates(),
     });
   }
 

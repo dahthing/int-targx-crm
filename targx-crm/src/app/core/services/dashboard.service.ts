@@ -122,10 +122,10 @@ export class DashboardService {
     const volume_trimestre = (
       (tranchesRes.data ?? []) as Array<{
         amount: number;
-        projects: { partner_id: string } | null;
+        projects: Array<{ partner_id: string }> | null;
       }>
     )
-      .filter((t) => t.projects?.partner_id === partnerId)
+      .filter((t) => (t.projects?.[0]?.partner_id ?? null) === partnerId)
       .reduce((s, t) => s + t.amount, 0);
 
     return calculatePartnerSummary({
@@ -191,13 +191,32 @@ export class DashboardService {
   }
 
   private async _getPipelineSummary(): Promise<PipelineSummary> {
-    const { data } = await this.supabase.from('leads').select('status, estimated_value');
-    const leads = (data ?? []) as Array<{
+    const { data } = await this.supabase
+      .from('leads')
+      .select('id, title, status, estimated_value, clients(name)')
+      .in('status', ['nova', 'contactada', 'proposta_enviada', 'negociacao'])
+      .order('created_at', { ascending: false });
+    const leads = (data ?? []) as unknown as Array<{
+      id: string;
+      title: string;
       status: LeadStatus;
       estimated_value: number | null;
+      clients: { name: string } | null;
     }>;
+
+    const statusOrder = ['nova', 'contactada', 'proposta_enviada', 'negociacao'];
+    const grouped = statusOrder.map(status => {
+      const inStatus = leads.filter(l => l.status === status);
+      return {
+        status,
+        count: inStatus.length,
+        value_total: inStatus.reduce((sum, l) => sum + (l.estimated_value ?? 0), 0),
+        leads: inStatus.map(l => ({ id: l.id, title: l.title, client_name: l.clients?.name ?? null })),
+      };
+    }).filter(g => g.count > 0);
+
     return {
-      groups: groupLeadsByStatus(leads),
+      groups: grouped,
       tempo_medio_dias: {},
       taxa_conversao: {},
     };
@@ -216,11 +235,11 @@ export class DashboardService {
     const projects = (data ?? []) as Array<{
       estimated_hours: number;
       actual_hours: number;
-      project_types: { slug: string } | null;
+      project_types: Array<{ slug: string }> | null;
     }>;
     return calculateEstimationAccuracy(
       projects.map((p) => ({
-        project_type: p.project_types?.slug ?? 'desconhecido',
+        project_type: p.project_types?.[0]?.slug ?? 'desconhecido',
         estimated_hours: p.estimated_hours,
         actual_hours: p.actual_hours,
       })),

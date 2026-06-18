@@ -124,11 +124,7 @@ export interface NewVersionDiff {
   status: QuoteStatus;
 }
 
-export function buildNewVersion(quote: {
-  id: string;
-  version: number;
-  [key: string]: unknown;
-}): NewVersionDiff {
+export function buildNewVersion(quote: { id: string; version: number }): NewVersionDiff {
   return {
     version: quote.version + 1,
     parent_quote_id: quote.id,

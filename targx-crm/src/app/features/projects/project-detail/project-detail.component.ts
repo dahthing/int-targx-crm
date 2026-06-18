@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   OnInit,
   signal,
@@ -67,7 +68,7 @@ import type { ProjectTranche } from '../../../core/models/project.model';
         </div>
 
         <!-- Tabs -->
-        <p-tabs [value]="activeTab()" (onChange)="activeTab.set($event.index)">
+        <p-tabs [value]="activeTab()" (valueChange)="onTabChange($event)">
           <p-tablist>
             <p-tab [value]="0">Fases</p-tab>
             <p-tab [value]="1">Gantt</p-tab>
@@ -200,7 +201,7 @@ export class ProjectDetailComponent implements OnInit {
   readonly #route = inject(ActivatedRoute);
   readonly #router = inject(Router);
   readonly #messageService = inject(MessageService);
-  readonly #destroyRef = takeUntilDestroyed();
+  readonly #destroyRef = inject(DestroyRef);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -219,7 +220,10 @@ export class ProjectDetailComponent implements OnInit {
       this.loading.set(false);
       return;
     }
-    this.#projectService.getById(id).pipe(this.#destroyRef).subscribe({
+    this.#projectService
+      .getById(id)
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe({
       next: (p) => {
         this.project.set(p);
         this.tranches.set([...p.tranches]);
@@ -233,7 +237,10 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   onTrancheToggle(tranche: ProjectTranche, checked: boolean): void {
-    this.#projectService.updateTranche(tranche.id, checked, tranche.received_date).pipe(this.#destroyRef).subscribe({
+    this.#projectService
+      .updateTranche(tranche.id, checked, tranche.received_date)
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe({
       next: (updated) => {
         this.tranches.update(list =>
           list.map(t => t.id === tranche.id ? { ...t, ...updated } : t)
@@ -246,7 +253,10 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   onTrancheDate(tranche: ProjectTranche, date: string): void {
-    this.#projectService.updateTranche(tranche.id, tranche.received, date).pipe(this.#destroyRef).subscribe({
+    this.#projectService
+      .updateTranche(tranche.id, tranche.received, date)
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe({
       next: (updated) => {
         this.tranches.update(list =>
           list.map(t => t.id === tranche.id ? { ...t, ...updated } : t)
@@ -256,6 +266,11 @@ export class ProjectDetailComponent implements OnInit {
         this.#messageService.add({ severity: 'error', summary: 'Erro', detail: err.message });
       },
     });
+  }
+
+  onTabChange(value: string | number | undefined): void {
+    const parsed = typeof value === 'number' ? value : Number.parseInt(value ?? '0', 10);
+    this.activeTab.set(Number.isFinite(parsed) ? parsed : 0);
   }
 
   protected statusLabel(status: string): string {

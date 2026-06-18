@@ -78,7 +78,7 @@ export async function getAllLeads(
   client: SupabaseClient,
   filters?: LeadFilters,
 ): Promise<Lead[]> {
-  let query = client.from('leads').select('*');
+  let query = client.from('leads').select('*, clients(name)');
   if (filters?.partner_id) {
     query = query.eq('partner_id', filters.partner_id) as typeof query;
   }
@@ -88,7 +88,10 @@ export async function getAllLeads(
   }
   const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []) as Lead[];
+  return ((data ?? []) as Array<Lead & { clients?: { name: string } | null }>).map(row => ({
+    ...row,
+    client_name: (row.clients as { name: string } | null)?.name ?? null,
+  })) as Lead[];
 }
 
 export async function addLeadActivity(

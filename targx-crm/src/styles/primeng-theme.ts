@@ -36,23 +36,9 @@ export const TargXTheme = definePreset(Aura, {
     },
   },
   components: {
-    button: {
-      borderRadius: '8px',
-      paddingX: '16px',
-      paddingY: '8px',
-      fontWeight: '500',
-    },
-    card: {
-      borderRadius: '12px',
-      shadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
-    },
-    inputtext: {
-      borderRadius: '8px',
-    },
-    datatable: {
-      headerBg: '#F9FAFB',
-      headerBorderColor: '#E5E7EB',
-      rowBorderColor: '#F3F4F6',
-    },
+    button: {},
+    card: {},
+    inputtext: {},
+    datatable: {},
   },
 });

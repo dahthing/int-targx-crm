@@ -140,7 +140,26 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }
     }
 
-    // 4. Log in email_logs
+    // 4. Insert into portal_access_log
+    const ipAddress = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? null;
+    const userAgent = req.headers.get('user-agent') ?? null;
+
+    const { error: accessLogError } = await supabase.from('portal_access_log').insert({
+      quote_id: quoteId,
+      action: action === 'aceite' ? 'accept' : 'reject',
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      metadata: {
+        rejection_reason: action === 'rejeitado' ? quote.rejection_reason : null,
+        recipients,
+      },
+    });
+
+    if (accessLogError) {
+      console.error('[handle-client-response] Failed to insert portal_access_log:', accessLogError.message);
+    }
+
+    // 5. Log in email_logs
     const eventKey = `client_response_${quoteId}`;
     const { error: logError } = await supabase.from('email_logs').insert({
       event_key: eventKey,

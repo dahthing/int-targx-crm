@@ -110,6 +110,16 @@ import { RouterLink } from '@angular/router';
             <p class="text-body-sm text-[var(--tx-gray-600)] mt-0.5">Registo imutável de alterações a campos críticos.</p>
           </div>
         </a>
+
+        <a routerLink="/settings/quote-templates" class="tx-card p-5 flex items-start gap-4 hover:border-[var(--tx-teal-500)] transition-colors cursor-pointer no-underline" aria-label="Templates de Orçamento">
+          <div class="w-10 h-10 rounded-lg bg-[var(--tx-teal-050)] flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[var(--tx-teal-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+          </div>
+          <div>
+            <p class="text-body font-semibold text-[var(--tx-gray-950)]">Templates de Orçamento</p>
+            <p class="text-body-sm text-[var(--tx-gray-600)] mt-0.5">Estruturas reutilizáveis para criar orçamentos rapidamente.</p>
+          </div>
+        </a>
       </div>
     </div>
   `,

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /Users/ruiguedes/WORK/AGENTS_AI/int-crm-tx/targx-crm && cat ../supabase/seed.sql | head -150)",
+      "Read(//Users/ruiguedes/WORK/AGENTS_AI/supabase/**)",
+      "Bash(grep -n \"scoping\\\\|catalog\\\\|módulos\\\\|modulos\\\\|catalog_item\\\\|scoping_question\\\\|risk_multiplier\" /Users/ruiguedes/Downloads/TargX_CRM_PRD_Master.md | head -40)",
+      "Read(//Users/ruiguedes/Downloads/**)"
+    ]
+  }
+}

@@ -14,11 +14,18 @@ export class AuthService {
   readonly role = computed<UserRole | null>(() => this.currentProfile()?.role ?? null);
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
 
+  readonly initPromise: Promise<void>;
+
   constructor() {
+    let resolveInit!: () => void;
+    this.initPromise = new Promise<void>(r => (resolveInit = r));
+
     this.#supabase.auth.getSession().then(({ data: { session } }) => {
       this.currentUser.set(session?.user ?? null);
       if (session?.user) {
-        this.#loadProfile(session.user.id);
+        this.#loadProfile(session.user.id).then(resolveInit);
+      } else {
+        resolveInit();
       }
     });
 

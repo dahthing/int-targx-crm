@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>{{quote_title}} — Proposta Comercial</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10pt;
+    color: #1a1a1a;
+    line-height: 1.5;
+    background: #fff;
+  }
+
+  /* ─── PAGE BREAKS ─── */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+  .page:last-child { page-break-after: avoid; }
+
+  /* ─── CAPA ─── */
+  .cover {
+    background: #0a0e1a;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 48px 52px;
+    min-height: 297mm;
+  }
+  .cover-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: auto;
+  }
+  .cover-logo svg { width: 140px; height: auto; }
+  .cover-meta {
+    text-align: right;
+    font-size: 8.5pt;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.7;
+  }
+  .cover-meta strong { color: rgba(255,255,255,0.8); }
+  .cover-body {
+    margin-top: 180px;
+    margin-bottom: 80px;
+  }
+  .cover-label {
+    font-size: 8pt;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 20px;
+  }
+  .cover-title {
+    font-size: 42pt;
+    font-weight: 300;
+    line-height: 1.15;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .cover-title strong {
+    font-weight: 700;
+    display: block;
+  }
+  .cover-accent {
+    width: 36px;
+    height: 3px;
+    background: #0D9488;
+    margin: 24px 0 28px;
+  }
+  .cover-description {
+    font-size: 10.5pt;
+    color: rgba(255,255,255,0.65);
+    max-width: 480px;
+    line-height: 1.65;
+  }
+  .cover-kpis {
+    display: flex;
+    gap: 0;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding-top: 28px;
+    margin-top: auto;
+  }
+  .cover-kpi {
+    flex: 1;
+    padding-right: 32px;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    margin-right: 32px;
+  }
+  .cover-kpi:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+  .cover-kpi-label {
+    font-size: 7pt;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 6px;
+  }
+  .cover-kpi-value {
+    font-size: 18pt;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .cover-kpi-sub {
+    font-size: 8pt;
+    color: rgba(255,255,255,0.45);
+    margin-top: 4px;
+  }
+  .cover-footer {
+    font-size: 7.5pt;
+    color: rgba(255,255,255,0.3);
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* ─── INNER PAGES ─── */
+  .inner {
+    padding: 40px 52px 60px;
+    min-height: 297mm;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Page header */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 32px;
+  }
+  .page-header-section {
+    font-size: 8pt;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #9ca3af;
+  }
+  .page-header-logo svg { width: 72px; height: auto; }
+
+  /* Page footer */
+  .page-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 7.5pt;
+    color: #9ca3af;
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  h2 {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0a0e1a;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+  }
+  h3 {
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: #0a0e1a;
+    margin-bottom: 6px;
+  }
+  .section-label {
+    font-size: 7pt;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 6px;
+  }
+
+  /* ─── IDENTIFICATION GRID ─── */
+  .id-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .id-cell {
+    padding: 16px 20px;
+    border-right: 1px solid #e5e7eb;
+  }
+  .id-cell:last-child { border-right: none; }
+  .id-cell-label {
+    font-size: 7pt;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 8px;
+  }
+  .id-cell-name {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0a0e1a;
+    margin-bottom: 4px;
+  }
+  .id-cell-detail {
+    font-size: 8.5pt;
+    color: #6b7280;
+    line-height: 1.6;
+  }
+
+  /* ─── DESCRIPTION BOX ─── */
+  .desc-box {
+    border-left: 3px solid #0D9488;
+    padding: 14px 18px;
+    background: #f9fafb;
+    margin-bottom: 24px;
+    border-radius: 0 4px 4px 0;
+  }
+  .desc-box-label {
+    font-size: 7pt;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 6px;
+  }
+  .desc-box-title {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #0a0e1a;
+    margin-bottom: 6px;
+  }
+  .desc-box-text {
+    font-size: 8.5pt;
+    color: #4b5563;
+    line-height: 1.65;
+  }
+
+  /* ─── TWO COLUMN LAYOUT ─── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 24px;
+  }
+
+  /* ─── APPROACH TEXT ─── */
+  .approach-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0a0e1a;
+    line-height: 1.3;
+    margin-bottom: 14px;
+  }
+  .approach-text {
+    font-size: 8.5pt;
+    color: #4b5563;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .approach-label {
+    font-size: 7pt;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  /* ─── DIVISÕES ─── */
+  .division-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .division-row:last-child { border-bottom: none; }
+  .division-bar {
+    width: 3px;
+    height: 32px;
+    background: #0D9488;
+    border-radius: 2px;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+  .division-name {
+    font-weight: 700;
+    font-size: 9pt;
+    color: #0a0e1a;
+    width: 90px;
+    flex-shrink: 0;
+  }
+  .division-desc {
+    font-size: 8.5pt;
+    color: #6b7280;
+  }
+
+  /* ─── TEAM TABLE ─── */
+  .team-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .team-table th {
+    text-align: left;
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 8px 10px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .team-table td {
+    padding: 10px 10px;
+    font-size: 8.5pt;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: top;
+  }
+  .team-table td:first-child { font-weight: 600; color: #0a0e1a; }
+  .team-table td:last-child { color: #4b5563; }
+
+  /* ─── FINANCIAL SUMMARY ─── */
+  .fin-summary-box {
+    background: #0a0e1a;
+    color: #fff;
+    padding: 22px 24px;
+    border-radius: 6px;
+    margin-bottom: 28px;
+  }
+  .fin-summary-label {
+    font-size: 7pt;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 10px;
+  }
+  .fin-summary-total {
+    font-size: 30pt;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+  .fin-summary-rows {
+    margin-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 12px;
+  }
+  .fin-summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 8.5pt;
+    color: rgba(255,255,255,0.7);
+    padding: 4px 0;
+  }
+  .fin-summary-row span:last-child { font-weight: 500; color: #fff; }
+
+  /* ─── PHASE BLOCKS ─── */
+  .phase-block {
+    margin-bottom: 24px;
+  }
+  .phase-header {
+    background: #f3f4f6;
+    padding: 10px 14px;
+    margin-bottom: 0;
+    border-radius: 4px 4px 0 0;
+  }
+  .phase-header-meta {
+    font-size: 7pt;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 2px;
+  }
+  .phase-header-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0a0e1a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .phase-header-duration {
+    font-size: 8.5pt;
+    font-weight: 400;
+    color: #6b7280;
+  }
+  .phase-items {
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
+  }
+  .phase-item {
+    padding: 9px 14px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .phase-item:last-child { border-bottom: none; }
+  .phase-item-title {
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: #0a0e1a;
+  }
+  .phase-item-sub {
+    font-size: 7.5pt;
+    color: #9ca3af;
+    margin-top: 2px;
+  }
+
+  /* ─── GANTT / TIMELINE ─── */
+  .gantt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 7.5pt;
+  }
+  .gantt-table th {
+    text-align: center;
+    padding: 5px 3px;
+    font-weight: 600;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+    width: 28px;
+  }
+  .gantt-table th:first-child { text-align: left; width: 160px; }
+  .gantt-table td {
+    padding: 5px 3px;
+    text-align: center;
+    border-bottom: 1px solid #f9fafb;
+  }
+  .gantt-table td:first-child { text-align: left; font-size: 8pt; color: #374151; padding-left: 0; }
+  .gantt-table .gantt-sub { font-size: 7pt; color: #9ca3af; }
+  .gantt-bar { width: 100%; height: 12px; border-radius: 2px; }
+  .gantt-bar-0 { background: #6b7280; }
+  .gantt-bar-1 { background: #0D9488; }
+  .gantt-bar-test { background: #d1d5db; }
+  .gantt-bar-1b { background: #0a0e1a; }
+
+  /* ─── OPEX TABLE ─── */
+  .opex-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+  }
+  .opex-table th {
+    text-align: left;
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 8px 10px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .opex-table th:not(:first-child) { text-align: right; }
+  .opex-table td {
+    padding: 10px 10px;
+    font-size: 8.5pt;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: top;
+  }
+  .opex-table td:not(:first-child) { text-align: right; font-family: 'JetBrains Mono', monospace; }
+  .opex-table .opex-main { font-weight: 700; color: #0a0e1a; }
+  .opex-table .opex-sub { font-size: 7.5pt; color: #9ca3af; margin-top: 2px; }
+  .opex-table tfoot td {
+    font-weight: 700;
+    border-top: 2px solid #0a0e1a;
+    border-bottom: none;
+    color: #0a0e1a;
+  }
+  .opex-table .opex-highlight { color: #0D9488; font-weight: 700; }
+
+  /* ─── NEXT PHASES TABLE ─── */
+  .next-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .next-table th {
+    text-align: left;
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 8px 10px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .next-table td {
+    padding: 10px 10px;
+    font-size: 8.5pt;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: top;
+  }
+  .next-table .next-phase { font-weight: 700; color: #0a0e1a; }
+  .next-table .next-price { font-weight: 700; color: #0D9488; text-align: right; font-family: 'JetBrains Mono', monospace; }
+  .next-table .next-focus { color: #4b5563; }
+
+  /* ─── CONDITIONS ─── */
+  .payment-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+  }
+  .payment-table th {
+    text-align: left;
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 8px 10px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .payment-table th:not(:first-child) { text-align: right; }
+  .payment-table td {
+    padding: 10px 10px;
+    font-size: 8.5pt;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .payment-table td:nth-child(2) { text-align: right; font-weight: 700; }
+  .payment-table td:nth-child(3) { text-align: right; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .payment-table tfoot td {
+    font-weight: 700;
+    border-top: 2px solid #0a0e1a;
+    border-bottom: none;
+  }
+  .payment-table tfoot td:not(:first-child) { text-align: right; font-family: 'JetBrains Mono', monospace; }
+
+  .cond-section { margin-bottom: 20px; }
+  .cond-label {
+    font-size: 7pt;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .cond-text {
+    font-size: 8.5pt;
+    color: #4b5563;
+    line-height: 1.65;
+  }
+
+  /* ─── SIGNATURE ─── */
+  .signature-box {
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 18px 20px;
+    margin-top: 28px;
+  }
+  .signature-title {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #0a0e1a;
+    margin-bottom: 4px;
+  }
+  .signature-sub {
+    font-size: 8pt;
+    color: #9ca3af;
+    margin-bottom: 24px;
+  }
+  .signature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  .signature-col-label {
+    font-size: 7pt;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 4px;
+  }
+  .signature-col-name {
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #0a0e1a;
+    margin-bottom: 2px;
+  }
+  .signature-col-role {
+    font-size: 7.5pt;
+    color: #6b7280;
+    margin-bottom: 24px;
+  }
+  .signature-line {
+    border-top: 1px solid #d1d5db;
+    margin-bottom: 4px;
+  }
+  .signature-date-label {
+    font-size: 7pt;
+    color: #9ca3af;
+  }
+
+  /* ─── MILESTONES ─── */
+  .milestones {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    padding: 16px 0;
+    border-top: 1px solid #f3f4f6;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .milestone {
+    flex: 1;
+    text-align: center;
+  }
+  .milestone-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 3px solid #0D9488;
+    background: #fff;
+    margin: 0 auto 8px;
+  }
+  .milestone-dot.filled { background: #0D9488; }
+  .milestone-line {
+    flex: 1;
+    height: 2px;
+    background: #e5e7eb;
+    margin: 0;
+    margin-top: -20px;
+  }
+  .milestone-month {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #0D9488;
+    margin-bottom: 4px;
+  }
+  .milestone-label {
+    font-size: 7.5pt;
+    color: #6b7280;
+  }
+
+  /* ─── DISTRIBUTION CHART ─── */
+  .dist-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 20px;
+  }
+  .dist-donut {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+  }
+  .dist-bars { padding-top: 8px; }
+  .dist-bar-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .dist-bar-label {
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #0a0e1a;
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .dist-bar-track {
+    flex: 1;
+    height: 14px;
+    background: #f3f4f6;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 0 10px;
+  }
+  .dist-bar-fill-0 { height: 100%; background: #6b7280; border-radius: 2px; }
+  .dist-bar-fill-1 { height: 100%; background: #0D9488; border-radius: 2px; }
+  .dist-bar-fill-1b { height: 100%; background: #0a0e1a; border-radius: 2px; }
+  .dist-bar-pct {
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #0D9488;
+    width: 32px;
+    text-align: right;
+  }
+  .dist-bar-value {
+    font-size: 8pt;
+    color: #9ca3af;
+    margin-left: 8px;
+  }
+  .dist-legend { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .dist-legend-item { display: flex; align-items: center; gap: 8px; font-size: 8pt; color: #4b5563; }
+  .dist-legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ─── WHAT CB NEEDS ─── */
+  .needs-list {
+    border-left: 3px solid #0D9488;
+    padding-left: 16px;
+  }
+  .needs-item {
+    font-size: 8.5pt;
+    color: #4b5563;
+    padding: 6px 0;
+    border-bottom: 1px solid #f3f4f6;
+    line-height: 1.5;
+  }
+  .needs-item:last-child { border-bottom: none; }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     CAPA
+═══════════════════════════════════════════════════ -->
+<div class="page cover">
+  <div class="cover-header">
+    <div class="cover-logo">
+      <!-- TARGX logo wordmark — white version -->
+      <svg viewBox="0 0 580 105" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="56" height="8" fill="white"/>
+        <rect x="24" y="0" width="8" height="105" fill="white"/>
+        <path d="M80 0 L120 0 L100 50 Z" fill="white"/>
+        <path d="M80 0 L60 105 L80 105 L100 52 L120 105 L140 105 L120 0 Z" fill="white"/>
+        <path d="M160 0 L160 105 L180 105 L180 60 L210 60 L235 105 L258 105 L228 55 C246 48 258 34 258 18 C258 7 249 0 236 0 Z M180 8 L234 8 C241 8 246 13 246 20 C246 33 236 52 216 52 L180 52 Z" fill="white"/>
+        <rect x="160" y="0" width="20" height="8" fill="white"/>
+        <path d="M272 0 L272 105 L292 105 L292 62 L320 62 L347 105 L370 105 L338 58 C354 50 366 36 366 20 C366 8 356 0 342 0 Z M292 8 L340 8 C347 8 352 13 352 20 C352 34 340 54 318 54 L292 54 Z" fill="white"/>
+        <rect x="272" y="0" width="90" height="8" fill="white"/>
+        <!-- X letter -->
+        <path d="M390 0 L430 52 L390 105 L414 105 L444 62 L474 105 L498 105 L458 52 L498 0 L474 0 L444 42 L414 0 Z" fill="white"/>
+      </svg>
+    </div>
+    <div class="cover-meta">
+      <div>Proposta Nº {{quote_number}}</div>
+      <div>{{proposal_month}}</div>
+      <div>targx.pt</div>
+    </div>
+  </div>
+
+  <div class="cover-body">
+    <div class="cover-label">Proposta Comercial · {{project_type_label}}</div>
+    <div class="cover-title">
+      {{cover_title_line1}}<strong>{{cover_title_line2}}</strong>
+    </div>
+    <div class="cover-accent"></div>
+    <div class="cover-description">{{cover_description}}</div>
+  </div>
+
+  <div class="cover-kpis">
+    <div class="cover-kpi">
+      <div class="cover-kpi-label">Investimento</div>
+      <div class="cover-kpi-value">{{total_with_tax_formatted}}</div>
+      <div class="cover-kpi-sub">{{investment_note}}</div>
+    </div>
+    <div class="cover-kpi">
+      <div class="cover-kpi-label">Duração</div>
+      <div class="cover-kpi-value">{{duration_label}}</div>
+      <div class="cover-kpi-sub">{{duration_note}}</div>
+    </div>
+    <div class="cover-kpi">
+      <div class="cover-kpi-label">Validade</div>
+      <div class="cover-kpi-value">30 dias</div>
+      <div class="cover-kpi-sub">A partir de {{proposal_date}}</div>
+    </div>
+    <div class="cover-kpi">
+      <div class="cover-kpi-label">Versão</div>
+      <div class="cover-kpi-value">v{{version}}</div>
+      <div class="cover-kpi-sub">{{status_label}}</div>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    TargX · Rua da Lionesa 446 C12, 4465-671 Leça do Balio · targx.pt &nbsp;·&nbsp; We are your Technological Partners
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PÁG 1 — Identificação e Âmbito
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="inner">
+    <div class="page-header">
+      <div class="page-header-section">Identificação e Âmbito</div>
+      <div class="page-header-logo">
+        <svg viewBox="0 0 580 105" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="56" height="8" fill="#0a0e1a"/>
+          <rect x="24" y="0" width="8" height="105" fill="#0a0e1a"/>
+          <path d="M80 0 L120 0 L100 50 Z" fill="#0a0e1a"/>
+          <path d="M80 0 L60 105 L80 105 L100 52 L120 105 L140 105 L120 0 Z" fill="#0a0e1a"/>
+          <path d="M160 0 L160 105 L180 105 L180 60 L210 60 L235 105 L258 105 L228 55 C246 48 258 34 258 18 C258 7 249 0 236 0 Z M180 8 L234 8 C241 8 246 13 246 20 C246 33 236 52 216 52 L180 52 Z" fill="#0a0e1a"/>
+          <rect x="160" y="0" width="20" height="8" fill="#0a0e1a"/>
+          <path d="M272 0 L272 105 L292 105 L292 62 L320 62 L347 105 L370 105 L338 58 C354 50 366 36 366 20 C366 8 356 0 342 0 Z M292 8 L340 8 C347 8 352 13 352 20 C352 34 340 54 318 54 L292 54 Z" fill="#0a0e1a"/>
+          <rect x="272" y="0" width="90" height="8" fill="#0a0e1a"/>
+          <path d="M390 0 L430 52 L390 105 L414 105 L444 62 L474 105 L498 105 L458 52 L498 0 L474 0 L444 42 L414 0 Z" fill="#0a0e1a"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Identificação -->
+    <div class="id-grid">
+      <div class="id-cell">
+        <div class="id-cell-label">Cliente</div>
+        <div class="id-cell-name">{{client_name}}</div>
+        <div class="id-cell-detail">{{client_company}}</div>
+        <div class="id-cell-detail">{{client_email}}</div>
+      </div>
+      <div class="id-cell">
+        <div class="id-cell-label">Prestador</div>
+        <div class="id-cell-name">TargX</div>
+        <div class="id-cell-detail">Rua da Lionesa 446 C12, 4465-671 Leça do Balio</div>
+        <div class="id-cell-detail">{{partner_email}} · {{partner_phone}}</div>
+      </div>
+    </div>
+
+    <!-- Descrição do serviço -->
+    <div class="desc-box">
+      <div class="desc-box-label">Descrição do Serviço</div>
+      <div class="desc-box-title">{{quote_title}}</div>
+      <div class="desc-box-text">{{description}}</div>
+    </div>
+
+    <!-- Two col: Abordagem + Equipa -->
+    <div class="two-col">
+      <div>
+        <div class="section-label">A Nossa Abordagem</div>
+        <div class="approach-title">{{approach_headline}}</div>
+        <div class="approach-text">{{approach_paragraph}}</div>
+        {{#if has_divisions}}
+        <div class="approach-label">Divisões / Áreas</div>
+        {{#each divisions}}
+        <div class="division-row">
+          <div class="division-bar"></div>
+          <div class="division-name">{{this.name}}</div>
+          <div class="division-desc">{{this.description}}</div>
+        </div>
+        {{/each}}
+        {{/if}}
+      </div>
+      <div>
+        <div class="section-label">A Equipa</div>
+        <table class="team-table">
+          <thead>
+            <tr>
+              <th>Perfil</th>
+              <th>Responsabilidade</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each team_members}}
+            <tr>
+              <td>{{this.role}}</td>
+              <td>{{this.responsibility}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <div>TargX · Rua da Lionesa 446 C12, 4465-671 Leça do Balio · targx.pt</div>
+      <div>1 / {{total_pages}}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PÁG 2 — Investimento e CAPEX
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="inner">
+    <div class="page-header">
+      <div class="page-header-section">Investimento e CAPEX</div>
+      <div class="page-header-logo">
+        <svg viewBox="0 0 580 105" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="56" height="8" fill="#0a0e1a"/>
+          <rect x="24" y="0" width="8" height="105" fill="#0a0e1a"/>
+          <path d="M80 0 L120 0 L100 50 Z" fill="#0a0e1a"/>
+          <path d="M80 0 L60 105 L80 105 L100 52 L120 105 L140 105 L120 0 Z" fill="#0a0e1a"/>
+          <path d="M390 0 L430 52 L390 105 L414 105 L444 62 L474 105 L498 105 L458 52 L498 0 L474 0 L444 42 L414 0 Z" fill="#0a0e1a"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Resumo financeiro -->
+    <div class="section-label">Resumo Financeiro</div>
+    <div class="fin-summary-box">
+      <div class="fin-summary-label">Total do Projecto &nbsp;·&nbsp; {{summary_scope}}</div>
+      <div class="fin-summary-total">{{total_before_tax_formatted}}</div>
+      <div class="fin-summary-rows">
+        {{#each financial_phases}}
+        <div class="fin-summary-row">
+          <span>{{this.label}}</span>
+          <span>{{this.value_formatted}}</span>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+
+    <div class="section-label">Detalhe por Fase e Módulo</div>
+
+    <!-- Phases detail -->
+    {{#each quote_phases}}
+    <div class="phase-block">
+      <div class="phase-header">
+        <div class="phase-header-meta">{{this.phase_meta}}</div>
+        <div class="phase-header-title">
+          {{this.name}}
+          <span class="phase-header-duration">{{this.duration}}</span>
+        </div>
+      </div>
+      <div class="phase-items">
+        {{#each this.items}}
+        <div class="phase-item">
+          <div class="phase-item-title">{{this.name}}</div>
+          {{#if this.description}}<div class="phase-item-sub">{{this.description}}</div>{{/if}}
+        </div>
+        {{/each}}
+      </div>
+    </div>
+    {{/each}}
+
+    <div class="page-footer">
+      <div>TargX · Rua da Lionesa 446 C12, 4465-671 Leça do Balio · targx.pt</div>
+      <div>2 / {{total_pages}}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PÁG 3 — Distribuição + Marcos
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="inner">
+    <div class="page-header">
+      <div class="page-header-section">Investimento e CAPEX (continuação)</div>
+      <div class="page-header-logo">
+        <svg viewBox="0 0 580 105" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="56" height="8" fill="#0a0e1a"/>
+          <rect x="24" y="0" width="8" height="105" fill="#0a0e1a"/>
+          <path d="M390 0 L430 52 L390 105 L414 105 L444 62 L474 105 L498 105 L458 52 L498 0 L474 0 L444 42 L414 0 Z" fill="#0a0e1a"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="section-label">Investimento Total — {{duration_label}}</div>
+
+    <!-- Investment total highlight -->
+    <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:4px; padding:16px 20px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="font-size:22pt; font-weight:700; color:#0a0e1a;">{{total_before_tax_formatted}}</div>
+      <div style="text-align:right; font-size:8.5pt; color:#6b7280; line-height:1.7;">
+        {{team_label}}<br>
+        <span style="color:#9ca3af; font-size:7.5pt;">Aos valores acresce IVA à taxa legal em vigor</span>
+      </div>
+    </div>
+
+    <!-- Distribution bars -->
+    <div class="section-label">Distribuição do Investimento de {{total_before_tax_formatted}}</div>
+    <div class="dist-grid">
+      <div class="dist-donut">
+        <!-- SVG donut chart -->
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          {{#each dist_segments}}
+          <circle cx="80" cy="80" r="60"
+            fill="none"
+            stroke="{{this.color}}"
+            stroke-width="28"
+            stroke-dasharray="{{this.dash}} {{this.gap}}"
+            stroke-dashoffset="{{this.offset}}"
+            transform="rotate(-90 80 80)"/>
+          {{/each}}
+          <text x="80" y="76" text-anchor="middle" font-family="Inter" font-size="14" font-weight="700" fill="#0a0e1a">{{total_before_tax_formatted}}</text>
+          <text x="80" y="92" text-anchor="middle" font-family="Inter" font-size="8" fill="#9ca3af">CAPEX TOTAL</text>
+        </svg>
+      </div>
+      <div class="dist-bars">
+        {{#each dist_bars}}
+        <div class="dist-bar-row">
+          <div class="dist-bar-label">{{this.label}}</div>
+          <div class="dist-bar-track">
+            <div class="dist-bar-fill-{{this.class}}" style="width:{{this.pct}}%"></div>
+          </div>
+          <div class="dist-bar-pct">{{this.pct}}%</div>
+          <div class="dist-bar-value">{{this.value_formatted}}</div>
+        </div>
+        {{/each}}
+        <div class="dist-legend">
+          {{#each dist_bars}}
+          <div class="dist-legend-item">
+            <div class="dist-legend-dot" style="background:{{this.color}}"></div>
+            <div><strong>{{this.label}}</strong> — {{this.description}}</div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+
+    <!-- Milestones -->
+    <div class="section-label">Marcos do Projecto — {{duration_label}}</div>
+    <div style="display:flex; align-items:flex-start; padding: 16px 0;">
+      {{#each milestones}}
+      <div style="flex:{{this.flex}}; text-align:center; position:relative;">
+        <div style="width:16px; height:16px; border-radius:50%; background:{{this.active_bg}}; border:3px solid #0D9488; margin:0 auto 10px;"></div>
+        <div style="font-size:9pt; font-weight:700; color:#0D9488; margin-bottom:3px;">{{this.month}}</div>
+        <div style="font-size:7.5pt; color:#6b7280;">{{this.label}}</div>
+      </div>
+      {{#unless @last}}
+      <div style="flex:1; height:2px; background:#e5e7eb; margin-top:7px;"></div>
+      {{/unless}}
+      {{/each}}
+    </div>
+
+    <div class="page-footer">
+      <div>TargX · Rua da Lionesa 446 C12, 4465-671 Leça do Balio · targx.pt</div>
+      <div>3 / {{total_pages}}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PÁG 4 — Cronograma + Custos Operacionais
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="inner">
+    <div class="page-header">
+      <div class="page-header-section">Cronograma e Custos Operacionais</div>
+      <div class="page-header-logo">
+        <svg viewBox="0 0 580 105" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="56" height="8" fill="#0a0e1a"/>
+          <rect x="24" y="0" width="8" height="105" fill="#0a0e1a"/>
+          <path d="M390 0 L430 52 L390 105 L414 105 L444 62 L474 105 L498 105 L458 52 L498 0 L474 0 L444 42 L414 0 Z" fill="#0a0e1a"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Gantt -->
+    <div class="section-label">Cronograma — {{team_label}}</div>
+    <table class="gantt-table">
+      <thead>
+        <tr>
+          <th>Módulo / Perfil</th>
+          {{#each gantt_months}}
+          <th>{{this}}</th>
+          {{/each}}
+        </tr>
+      </thead>
+      <tbody>
+        {{#each gantt_rows}}
+        <tr>
+          <td>
+            <div>{{this.label}}</div>
+            <div class="gantt-sub">{{this.sub}}</div>
+          </td>
+          {{#each this.cells}}
+          <td>{{#if this.active}}<div class="gantt-bar gantt-bar-{{../../../@index}}"></div>{{/if}}</td>
+          {{/each}}
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <!-- Two col: OPEX + Fases seguintes -->
+    <div class="two-col" style="margin-top:20px;">
+      <div>
+        <div class="section-label">Custos Operacionais Anuais a partir do {{opex_start}}</div>
+        <table class="opex-table">
+          <thead>
+            <tr><th>Item</th><th>Mensal</th><th>Anual</th></tr>
+          </thead>
+          <tbody>
+            {{#each opex_items}}
+            <tr>
+              <td>
+                <div class="opex-main">{{this.name}}</div>
+                <div class="opex-sub">{{this.description}}</div>
+              </td>
+              <td>{{this.monthly}}</td>
+              <td>{{this.annual}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Total anual (TargX)</td>
+              <td class="opex-highlight">{{opex_total_monthly}}</td>
+              <td class="opex-highlight">{{opex_total_annual}}</td>
+            </tr>
+          </tfoot>
+        </table>
+        <p style="font-size:7.5pt; color:#9ca3af; line-height:1.6; margin-top:8px;">
+          Valores pagos à TargX. Licenças de terceiros são facturadas directamente ao cliente e orçamentadas em separado.
+        </p>
+      </div>
+      <div>
+        <div class="section-label">Fases Seguintes</div>
+        <table class="next-table">
+          <thead>
+            <tr><th>Fase</th><th>Foco</th><th>Estimativa</th></tr>
+          </thead>
+          <tbody>
+            {{#each next_phases}}
+            <tr>
+              <td class="next-phase">{{this.phase}}</td>
+              <td class="next-focus">{{this.focus}}</td>
+              <td class="next-price">{{this.estimate}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+
+        {{#if client_requirements}}
+        <div style="margin-top:20px;">
+          <div class="section-label">O que o cliente precisa de assegurar</div>
+          <div class="needs-list">
+            {{#each client_requirements}}
+            <div class="needs-item">{{this}}</div>
+            {{/each}}
+          </div>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <div>TargX · Rua da Lionesa 446 C12, 4465-671 Leça do Balio · targx.pt</div>
+      <div>4 / {{total_pages}}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PÁG 5 — Condições da Proposta
+═══════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="inner">
+    <div class="page-header">
+      <div class="page-header-section">Condições da Proposta</div>
+      <div class="page-header-logo">
+        <svg viewBox="0 0 580 105" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="56" height="8" fill="#0a0e1a"/>
+          <rect x="24" y="0" width="8" height="105" fill="#0a0e1a"/>
+          <path d="M390 0 L430 52 L390 105 L414 105 L444 62 L474 105 L498 105 L458 52 L498 0 L474 0 L444 42 L414 0 Z" fill="#0a0e1a"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <!-- Payment plan -->
+        <div class="section-label">Plano de Pagamentos</div>
+        <table class="payment-table">
+          <thead>
+            <tr><th>Momento</th><th>%</th><th>Valor Ref.</th></tr>
+          </thead>
+          <tbody>
+            {{#each payment_plan}}
+            <tr>
+              <td>{{this.milestone}}</td>
+              <td>{{this.pct}}</td>
+              <td>{{this.value_formatted}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Total</td>
+              <td>100%</td>
+              <td>{{total_before_tax_formatted}}</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <!-- Warranty -->
+        <div class="cond-section" style="margin-top:20px;">
+          <div class="cond-label">Garantia Pós-Lançamento</div>
+          <div class="cond-text">{{warranty_text}}</div>
+        </div>
+
+        <!-- Not included -->
+        <div class="cond-section">
+          <div class="cond-label">Não Incluído</div>
+          <div class="cond-text">{{not_included_text}}</div>
+        </div>
+
+        <!-- Validity -->
+        <div class="cond-section">
+          <div class="cond-label">Validade</div>
+          <div class="cond-text">{{validity_text}}</div>
+        </div>
+      </div>
+
+      <div>
+        <!-- Confidentiality -->
+        <div class="cond-section">
+          <div class="cond-label">Confidencialidade</div>
+          <div class="cond-text">O conteúdo deste documento é informação confidencial, de uso exclusivo do destinatário. Não deverá copiar, distribuir ou revelar o seu conteúdo a terceiros sem autorização escrita da TargX.</div>
+        </div>
+
+        <!-- Values & scope -->
+        <div class="cond-section">
+          <div class="cond-label">Valores e Âmbito</div>
+          <div class="cond-text">Os valores correspondem à proposta elaborada para este projecto específico. Qualquer alteração de âmbito após o início é formalizada por escrito, com impacto transparente em custo e prazo.</div>
+        </div>
+
+        <!-- Late payment -->
+        <div class="cond-section">
+          <div class="cond-label">Incumprimento de Pagamento</div>
+          <div class="cond-text">Em caso de incumprimento dos prazos de pagamento, a TargX reserva-se o direito de aplicar um agravamento de 20% sobre o valor em dívida, acrescido de IVA, por cada 30 dias de atraso.</div>
+        </div>
+
+        <!-- IP -->
+        <div class="cond-section">
+          <div class="cond-label">Propriedade Intelectual</div>
+          <div class="cond-text">O código, design e activos digitais desenvolvidos pela TargX são propriedade da TargX até à liquidação integral dos valores em dívida. Após regularização, os direitos de utilização são transferidos para o cliente conforme acordado.</div>
+        </div>
+
+        <!-- Invoicing -->
+        <div class="cond-section">
+          <div class="cond-label">Sustentabilidade e Facturação</div>
+          <div class="cond-text">Todas as facturas são emitidas digitalmente, certificadas pela AT, em formato PDF e enviadas por email. Os pagamentos são efectuados por transferência bancária com envio de comprovativo.</div>
+        </div>
+
+        <!-- General -->
+        <div class="cond-section">
+          <div class="cond-label">Disposições Gerais</div>
+          <div class="cond-text">O valor e os serviços incluídos estão sujeitos a actualização anual, da qual o cliente será informado atempadamente. Em caso de litígio, é competente o tribunal da comarca da sede da TargX, aplicando-se a lei portuguesa.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Signature -->
+    <div class="signature-box">
+      <div class="signature-title">Aceitação da Proposta</div>
+      <div class="signature-sub">O cliente aceita os serviços, termos e condições através de carimbo da empresa e assinatura do seu representante legal.</div>
+      <div class="signature-grid">
+        <div>
+          <div class="signature-col-label">Pela TargX</div>
+          <div class="signature-col-name">{{partner_name}}</div>
+          <div class="signature-col-role">{{partner_role_label}}</div>
+          <div class="signature-line"></div>
+          <div class="signature-date-label">Data ___________________________</div>
+        </div>
+        <div>
+          <div class="signature-col-label">Pelo Prestador</div>
+          <div class="signature-col-name">{{partner_name}}</div>
+          <div class="signature-col-role">Parceiro Comercial</div>
+          <div class="signature-line"></div>
+          <div class="signature-date-label">Data ___________________________</div>
+        </div>
+        <div>
+          <div class="signature-col-label">Pelo Cliente</div>
+          <div class="signature-col-name">{{client_name}}</div>
+          <div class="signature-col-role">Nome · Cargo</div>
+          <div class="signature-line"></div>
+          <div class="signature-date-label">Data ___________________________</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <div>TargX · Rua da Lionesa 446 C12, 4465-671 Leça do Balio · targx.pt</div>
+      <div>5 / {{total_pages}}</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

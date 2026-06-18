@@ -11,6 +11,8 @@ import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { from, Observable } from 'rxjs';
 import { SUPABASE_CLIENT } from '../../../core/supabase/supabase.client';
+import { RoiCalculatorComponent } from '../roi-calculator/roi-calculator.component';
+import type { RoiMetrics } from '../roi-calculator/roi-calculator.component';
 import {
   validateToken,
   buildAcceptanceUpdate,
@@ -28,7 +30,7 @@ interface PortalQuote extends Quote {
   selector: 'app-client-portal',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RoiCalculatorComponent],
   template: `
     <!-- Minimal public header -->
     <header class="portal-header">
@@ -182,6 +184,13 @@ interface PortalQuote extends Quote {
               <span class="font-mono">{{ formatCurrency(totalWithTax()) }}</span>
             </div>
           </div>
+
+          <!-- ROI Metrics -->
+          @if (roiMetrics()) {
+            <div class="mb-6">
+              <app-roi-calculator [metrics]="roiMetrics()!" />
+            </div>
+          }
 
           <!-- Rejection form -->
           @if (showRejectForm()) {
@@ -646,6 +655,7 @@ export class ClientPortalComponent implements OnInit {
   readonly actionError = signal<string | null>(null);
   readonly expandedPhases = signal<Set<string>>(new Set());
   readonly selectedOptionals = signal<Set<string>>(new Set());
+  readonly roiMetrics = signal<RoiMetrics | null>(null);
 
   rejectionReason = '';
 
@@ -718,6 +728,11 @@ export class ClientPortalComponent implements OnInit {
       this.expandedPhases.set(new Set(phaseList.map(p => p.id)));
       this.quote.set({ ...q, phases: phasesWithItems });
 
+      // Load ROI benchmark if project_type_id present
+      if (q.project_type_id) {
+        void this.#loadRoi(q.project_type_id, q.total_before_tax ?? 0);
+      }
+
       // Track portal open
       void this.#trackOpen(q.id, q.portal_open_count);
     } catch (err) {
@@ -739,6 +754,27 @@ export class ClientPortalComponent implements OnInit {
         portal_opened_at: currentCount === 0 ? new Date().toISOString() : undefined,
       })
       .eq('id', quoteId);
+  }
+
+  async #loadRoi(projectTypeId: string, investment: number): Promise<void> {
+    const { data } = await this.#supabase
+      .from('roi_benchmarks')
+      .select('*')
+      .eq('project_type_id', projectTypeId)
+      .eq('active', true)
+      .gte('investment_range_max', investment)
+      .lte('investment_range_min', investment)
+      .limit(1)
+      .maybeSingle();
+    if (data) {
+      this.roiMetrics.set({
+        paybackMonths: data['avg_payback_months'] as number,
+        revenueIncreasePct: data['avg_revenue_increase_pct'] as number | null,
+        costReductionPct: data['avg_cost_reduction_pct'] as number | null,
+        benchmarkLabel: data['label'] as string,
+        sampleSize: data['sample_size'] as number,
+      });
+    }
   }
 
   togglePhase(phaseId: string): void {

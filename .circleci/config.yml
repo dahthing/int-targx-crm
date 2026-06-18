@@ -1,0 +1,195 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2.1
+
+parameters:
+  CIRCLE_NODE_VERSION:
+    type: string
+    default: "cimg/node:24.14.1"
+  server_path_prod:
+    type: string
+    default: "/var/www/crm.targx.com"
+  server_path_dev:
+    type: string
+    default: "/var/www/dev.crm.targx.com"
+  folder_path_prod:
+    type: string
+    default: "/tmp/workspace/targx-crm/dist/targx-crm/browser/*"
+  folder_path_dev:
+    type: string
+    default: "/tmp/workspace/targx-crm/dist/targx-crm/browser/*"
+
+jobs:
+  # Stands up environment, installing dependencies.
+  # Restores and saves our cache of node_modules.
+  environment:
+    docker:
+      - image: << pipeline.parameters.CIRCLE_NODE_VERSION >>
+
+    # resource_class: xlarge
+    working_directory: /tmp/workspace
+
+    steps:
+      - checkout
+      - run: node --version
+
+      - run: sudo apt update && sudo apt install -y rsync
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "targx-crm/package-lock.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run:
+          name: Install dependencies
+          command: cd targx-crm && npm ci
+
+      - save_cache:
+          paths:
+            - targx-crm/node_modules
+          key: v1-dependencies-{{ checksum "targx-crm/package-lock.json" }}
+
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - "**"
+
+  dev:
+    docker:
+      - image: << pipeline.parameters.CIRCLE_NODE_VERSION >>
+
+    # resource_class: xlarge
+    working_directory: /tmp/workspace
+
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+
+      - run: node --version
+      - run: sudo apt update && sudo apt install -y rsync
+
+      - run:
+          name: Build (development)
+          command: cd targx-crm && npm run build:dev
+
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - targx-crm/dist
+
+      - add_ssh_keys:
+          fingerprints:
+            - "4e:be:f4:e5:a5:bf:87:08:c5:c8:ae:e1:ed:29:fa:68"
+      - run:
+          name: echo host variable
+          command: ssh-keyscan -p $SSH_PORT $SSH_HOST
+      - run:
+          name: fix host authenticity for production server
+          command: ssh-keyscan -p $SSH_PORT $SSH_HOST >> ~/.ssh/known_hosts
+
+      - run:
+          name: Deploy Over SSH
+          command: |
+            rsync -avz --delete -e "ssh -p$SSH_PORT" --progress --partial --human-readable << pipeline.parameters.folder_path_dev >> $SSH_USER@$SSH_HOST:<< pipeline.parameters.server_path_dev >>
+
+  # Builds a distributable bundle for production.
+  build:
+    docker:
+      - image: << pipeline.parameters.CIRCLE_NODE_VERSION >>
+
+    # resource_class: xlarge
+    working_directory: /tmp/workspace
+
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+
+      - run: node --version
+      - run: sudo apt update && sudo apt install -y rsync
+
+      - run:
+          name: Build (production)
+          command: cd targx-crm && npm run build
+
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - targx-crm/dist
+
+      - add_ssh_keys:
+          fingerprints:
+            - "4e:be:f4:e5:a5:bf:87:08:c5:c8:ae:e1:ed:29:fa:68"
+      - run:
+          name: echo host variable
+          command: ssh-keyscan -p $SSH_PORT $SSH_HOST
+      - run:
+          name: fix host authenticity for production server
+          command: ssh-keyscan -p $SSH_PORT $SSH_HOST >> ~/.ssh/known_hosts
+
+      - run:
+          name: Deploy Over SSH
+          command: |
+            rsync -avz --delete -e "ssh -p$SSH_PORT" --progress --partial --human-readable << pipeline.parameters.folder_path_prod >> $SSH_USER@$SSH_HOST:<< pipeline.parameters.server_path_prod >>
+
+  # Aplica migrations e faz deploy das Edge Functions no Supabase
+  # supabase:
+  #   docker:
+  #     - image: << pipeline.parameters.CIRCLE_NODE_VERSION >>
+  #
+  #   working_directory: /tmp/workspace
+  #
+  #   steps:
+  #     - attach_workspace:
+  #         at: /tmp/workspace
+  #
+  #     - run:
+  #         name: Install Supabase CLI
+  #         command: |
+  #           curl -fsSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz \
+  #             | tar -xz -C /usr/local/bin supabase
+  #           supabase --version
+  #
+  #     - run:
+  #         name: Apply DB migrations
+  #         command: |
+  #           supabase db push \
+  #             --db-url "postgresql://postgres:${SUPABASE_DB_PASSWORD}@db.${SUPABASE_PROJECT_ID}.supabase.co:5432/postgres"
+  #
+  #     - run:
+  #         name: Deploy Edge Functions
+  #         command: |
+  #           supabase functions deploy \
+  #             --project-ref $SUPABASE_PROJECT_ID \
+  #             --no-verify-jwt
+
+workflows:
+  version: 2
+  "deploy":
+    jobs:
+      - environment
+      # - supabase:
+      #     requires:
+      #       - environment
+      #     filters:
+      #       branches:
+      #         only:
+      #           - main
+      #           - develop
+      - dev:
+          requires:
+            - environment
+          filters:
+            branches:
+              only:
+                - develop
+      - build:
+          requires:
+            - environment
+          filters:
+            branches:
+              only:
+                - main

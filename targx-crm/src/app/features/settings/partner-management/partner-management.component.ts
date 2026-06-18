@@ -30,35 +30,46 @@ interface PartnerRow {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, ToastModule],
   providers: [MessageService],
+  styles: [`
+    .drawer-overlay { position:fixed; inset:0; z-index:40; background:rgba(0,0,0,0.4); }
+    .drawer { position:fixed; top:0; right:0; height:100%; width:384px; z-index:50; display:flex; flex-direction:column; background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,0.15); }
+    .drawer-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--tx-gray-200); }
+    .drawer-title { font-size:1rem; font-weight:600; color:var(--tx-gray-900); }
+    .drawer-body { flex:1; padding:24px; display:flex; flex-direction:column; gap:16px; overflow-y:auto; }
+    .drawer-footer { padding:20px 24px; border-top:1px solid var(--tx-gray-200); display:flex; gap:12px; }
+    .drawer-footer button { flex:1; }
+  `],
   template: `
     <p-toast />
 
-    <div class="p-6">
-      <div class="flex items-center justify-between mb-6">
+    <div style="padding:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
         <div>
-          <h1 class="text-h2" style="color: var(--tx-gray-950)">Gestão de Parceiros</h1>
-          <p class="text-body-sm mt-1" style="color: var(--text-secondary)">Parceiros registados, planos activos e métricas.</p>
+          <h1 class="page-title">Gestão de Parceiros</h1>
+          <p style="color:var(--tx-gray-500);font-size:0.875rem;margin-top:4px">Parceiros registados, planos activos e métricas.</p>
         </div>
-        <button class="tx-btn-primary" (click)="openInvite()">+ Convidar parceiro</button>
+        <button class="tx-btn-primary" (click)="openInvite()">
+          <i class="pi pi-user-plus"></i>Convidar parceiro
+        </button>
       </div>
 
       @if (loading()) {
-        <div class="tx-card py-12 text-center">
-          <i class="pi pi-spin pi-spinner text-3xl" style="color: var(--tx-teal-500)"></i>
+        <div class="tx-card" style="padding:48px;text-align:center">
+          <i class="pi pi-spin pi-spinner" style="font-size:1.5rem;color:var(--tx-teal-500)"></i>
         </div>
       } @else if (partners().length === 0) {
-        <div class="tx-card py-12 text-center" style="color: var(--text-muted)">
+        <div class="tx-card" style="padding:48px;text-align:center;color:var(--tx-gray-400)">
           Nenhum parceiro encontrado.
         </div>
       } @else {
-        <div class="tx-card overflow-hidden">
-          <table class="tx-table w-full">
+        <div class="tx-card" style="overflow:hidden">
+          <table class="tx-table" style="width:100%">
             <thead>
               <tr>
                 <th>Parceiro</th>
                 <th>Plano activo</th>
-                <th class="text-right">Leads</th>
-                <th class="text-right">Volume YTD</th>
+                <th style="text-align:right">Leads</th>
+                <th style="text-align:right">Volume YTD</th>
                 <th></th>
               </tr>
             </thead>
@@ -66,43 +77,27 @@ interface PartnerRow {
               @for (partner of partners(); track partner.id) {
                 <tr>
                   <td>
-                    <p class="font-semibold" style="color: var(--tx-gray-900)">{{ partner.full_name }}</p>
-                    <p class="text-body-sm" style="color: var(--text-muted)">{{ partner.email }}</p>
+                    <p style="font-weight:600;color:var(--tx-gray-900);margin:0">{{ partner.full_name }}</p>
+                    <p style="font-size:0.8125rem;color:var(--tx-gray-400);margin:2px 0 0">{{ partner.email }}</p>
                   </td>
                   <td>
                     @if (partner.plan_name) {
-                      <div>
-                        <span class="tx-badge" style="background: var(--tx-teal-100); color: var(--tx-teal-700)">
-                          {{ partner.plan_name }}
-                        </span>
-                        @if (partner.active_from) {
-                          <p class="text-body-sm mt-1" style="color: var(--text-muted)">desde {{ formatDate(partner.active_from) }}</p>
-                        }
-                      </div>
+                      <span class="tx-badge" style="background:var(--tx-teal-100);color:var(--tx-teal-700)">{{ partner.plan_name }}</span>
+                      @if (partner.active_from) {
+                        <p style="font-size:0.8125rem;color:var(--tx-gray-400);margin:4px 0 0">desde {{ formatDate(partner.active_from) }}</p>
+                      }
                     } @else {
-                      <span style="color: var(--text-muted)">Sem plano</span>
+                      <span style="color:var(--tx-gray-400);font-size:0.875rem">Sem plano</span>
                     }
                   </td>
-                  <td class="text-right font-mono">{{ partner.leads_count }}</td>
-                  <td class="text-right font-mono font-semibold" style="color: var(--tx-teal-600)">
+                  <td style="text-align:right;font-family:var(--font-mono)">{{ partner.leads_count }}</td>
+                  <td style="text-align:right;font-family:var(--font-mono);font-weight:600;color:var(--tx-teal-600)">
                     {{ formatCurrency(partner.volume_ytd) }}
                   </td>
-                  <td class="text-right">
-                    <div class="flex items-center justify-end gap-2">
-                      <button
-                        class="tx-btn-secondary text-sm px-3 py-1.5"
-                        (click)="openChangePlan(partner)"
-                        aria-label="Mudar plano"
-                      >
-                        Mudar plano
-                      </button>
-                      <button
-                        class="tx-btn-ghost text-sm px-3 py-1.5"
-                        (click)="viewCommissions(partner)"
-                        aria-label="Ver comissões"
-                      >
-                        Comissões
-                      </button>
+                  <td style="text-align:right">
+                    <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px">
+                      <button class="tx-btn-secondary" style="font-size:0.8125rem;padding:6px 12px" (click)="openChangePlan(partner)">Mudar plano</button>
+                      <button class="tx-btn-ghost" style="font-size:0.8125rem;padding:6px 12px" (click)="viewCommissions(partner)">Comissões</button>
                     </div>
                   </td>
                 </tr>
@@ -115,27 +110,22 @@ interface PartnerRow {
 
     <!-- Invite Drawer -->
     @if (showInviteDrawer()) {
-      <div class="fixed inset-0 z-40" style="background: rgba(0,0,0,0.4)" (click)="closeInvite()"></div>
-      <div class="fixed top-0 right-0 h-full w-96 z-50 flex flex-col"
-           style="background: var(--surface-card); box-shadow: -4px 0 24px rgba(0,0,0,0.15)">
-        <div class="flex items-center justify-between p-6 border-b" style="border-color: var(--tx-gray-200)">
-          <h3 class="text-h3">Convidar Parceiro</h3>
-          <button class="tx-btn-ghost p-1" (click)="closeInvite()" aria-label="Fechar">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
+      <div class="drawer-overlay" (click)="closeInvite()"></div>
+      <div class="drawer">
+        <div class="drawer-header">
+          <span class="drawer-title">Convidar Parceiro</span>
+          <button class="tx-btn-ghost" (click)="closeInvite()" aria-label="Fechar"><i class="pi pi-times"></i></button>
         </div>
-        <div class="flex-1 p-6 flex flex-col gap-4">
-          <div class="tx-field">
+        <div class="drawer-body">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <label class="tx-form-label" for="invite-email">Email *</label>
             <input id="invite-email" type="email" class="tx-input" [(ngModel)]="inviteEmail" placeholder="parceiro@empresa.com" />
           </div>
         </div>
-        <div class="p-6 border-t flex gap-3" style="border-color: var(--tx-gray-200)">
-          <button class="tx-btn-secondary flex-1" (click)="closeInvite()">Cancelar</button>
-          <button class="tx-btn-primary flex-1" (click)="sendInvite()" [disabled]="!inviteEmail.trim() || saving()">
-            @if (saving()) { <i class="pi pi-spin pi-spinner mr-2"></i> }
+        <div class="drawer-footer">
+          <button class="tx-btn-secondary" (click)="closeInvite()">Cancelar</button>
+          <button class="tx-btn-primary" (click)="sendInvite()" [disabled]="!inviteEmail.trim() || saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner" style="margin-right:6px"></i> }
             Enviar convite
           </button>
         </div>
@@ -144,22 +134,17 @@ interface PartnerRow {
 
     <!-- Change Plan Drawer -->
     @if (showChangePlanDrawer()) {
-      <div class="fixed inset-0 z-40" style="background: rgba(0,0,0,0.4)" (click)="closeChangePlan()"></div>
-      <div class="fixed top-0 right-0 h-full w-96 z-50 flex flex-col"
-           style="background: var(--surface-card); box-shadow: -4px 0 24px rgba(0,0,0,0.15)">
-        <div class="flex items-center justify-between p-6 border-b" style="border-color: var(--tx-gray-200)">
-          <h3 class="text-h3">Mudar Plano</h3>
-          <button class="tx-btn-ghost p-1" (click)="closeChangePlan()" aria-label="Fechar">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
+      <div class="drawer-overlay" (click)="closeChangePlan()"></div>
+      <div class="drawer">
+        <div class="drawer-header">
+          <span class="drawer-title">Mudar Plano</span>
+          <button class="tx-btn-ghost" (click)="closeChangePlan()" aria-label="Fechar"><i class="pi pi-times"></i></button>
         </div>
-        <div class="flex-1 p-6 flex flex-col gap-4">
-          <p class="text-body" style="color: var(--text-secondary)">
-            Parceiro: <strong>{{ selectedPartner()?.full_name }}</strong>
+        <div class="drawer-body">
+          <p style="font-size:0.875rem;color:var(--tx-gray-500)">
+            Parceiro: <strong style="color:var(--tx-gray-900)">{{ selectedPartner()?.full_name }}</strong>
           </p>
-          <div class="tx-field">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <label class="tx-form-label" for="change-plan">Plano *</label>
             <select id="change-plan" class="tx-input" [(ngModel)]="changePlanId">
               <option value="">Seleccionar plano…</option>
@@ -168,15 +153,15 @@ interface PartnerRow {
               }
             </select>
           </div>
-          <div class="tx-field">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <label class="tx-form-label" for="change-from">Activo a partir de *</label>
             <input id="change-from" type="date" class="tx-input" [(ngModel)]="changeActiveFrom" />
           </div>
         </div>
-        <div class="p-6 border-t flex gap-3" style="border-color: var(--tx-gray-200)">
-          <button class="tx-btn-secondary flex-1" (click)="closeChangePlan()">Cancelar</button>
-          <button class="tx-btn-primary flex-1" (click)="savePlanChange()" [disabled]="!changePlanId || saving()">
-            @if (saving()) { <i class="pi pi-spin pi-spinner mr-2"></i> }
+        <div class="drawer-footer">
+          <button class="tx-btn-secondary" (click)="closeChangePlan()">Cancelar</button>
+          <button class="tx-btn-primary" (click)="savePlanChange()" [disabled]="!changePlanId || saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner" style="margin-right:6px"></i> }
             Guardar
           </button>
         </div>
@@ -223,18 +208,19 @@ export class PartnerManagementComponent implements OnInit {
 
     const profiles = (profilesResult.data ?? []) as Array<{ id: string; full_name: string; email: string; active: boolean }>;
     const leads = (leadsResult.data ?? []) as Array<{ partner_id: string }>;
-    const tranches = (tranchesResult.data ?? []) as Array<{ projects: { partner_id: string } | null; amount: number }>;
+    const tranches = (tranchesResult.data ?? []) as Array<{
+      projects: Array<{ partner_id: string }> | null;
+      amount: number;
+    }>;
     const partnerPlans = (partnerPlansResult.data ?? []) as Array<{ partner_id: string; plan_id: string; active_from: string }>;
     const plans = (plansResult.data ?? []) as Array<CommissionPlan & { active?: boolean }>;
-
-    const currentYear = new Date().getFullYear();
 
     const rows: PartnerRow[] = profiles.map(p => {
       const pp = partnerPlans.find(x => x.partner_id === p.id);
       const plan = pp ? plans.find(pl => pl.id === pp.plan_id) : null;
       const leadsCount = leads.filter(l => l.partner_id === p.id).length;
       const volumeYtd = tranches
-        .filter(t => t.projects?.partner_id === p.id)
+        .filter(t => (t.projects?.[0]?.partner_id ?? null) === p.id)
         .reduce((sum, t) => sum + Number(t.amount), 0);
 
       return {

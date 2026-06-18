@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt">
+<!--
+  TargX Lead Widget — formulário embeddable
+  Uso:
+    1. Copiar este ficheiro para o servidor web do cliente
+    2. Configurar TARGX_ENDPOINT com a URL da Edge Function
+    3. Embutir via <iframe> ou incluir directamente no HTML
+
+  Embedding via iframe:
+    <iframe src="https://seusite.com/lead-widget.html"
+            width="100%" height="520"
+            style="border:none; border-radius:12px;">
+    </iframe>
+
+  Parâmetros via URL:
+    ?partner_id=UUID   — pre-associa ao partner (opcional)
+    ?source=website    — origem do lead (opcional, default: "website")
+    ?lang=pt           — idioma (pt | en, default: pt)
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto — TargX</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --tx-blue-950: #0F2044;
+      --tx-teal-500: #0D9488;
+      --tx-teal-600: #0b7c71;
+      --tx-gray-50:  #F9FAFB;
+      --tx-gray-100: #F3F4F6;
+      --tx-gray-200: #E5E7EB;
+      --tx-gray-500: #6B7280;
+      --tx-gray-700: #374151;
+      --tx-danger:   #DC2626;
+      --tx-success:  #059669;
+      --radius: 10px;
+      --font: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: #fff;
+      color: var(--tx-gray-700);
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    .widget-header {
+      margin-bottom: 20px;
+    }
+    .widget-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--tx-blue-950);
+      margin-bottom: 4px;
+    }
+    .widget-header p {
+      font-size: 13px;
+      color: var(--tx-gray-500);
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--tx-gray-700);
+      margin-bottom: 5px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    label .req { color: var(--tx-teal-500); margin-left: 2px; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--tx-gray-200);
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--tx-gray-700);
+      background: var(--tx-gray-50);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--tx-teal-500);
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+      background: #fff;
+    }
+    input.error, select.error, textarea.error {
+      border-color: var(--tx-danger);
+    }
+    .field-error {
+      font-size: 11.5px;
+      color: var(--tx-danger);
+      margin-top: 4px;
+      display: none;
+    }
+    .field-error.visible { display: block; }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 480px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 11px 20px;
+      background: var(--tx-teal-500);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-submit:hover:not(:disabled) { background: var(--tx-teal-600); }
+    .btn-submit:active:not(:disabled) { transform: scale(0.98); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Success state */
+    .success-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+      gap: 16px;
+    }
+    .success-icon {
+      width: 56px; height: 56px;
+      background: rgba(13,148,136,0.1);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .success-icon svg { width: 28px; height: 28px; color: var(--tx-teal-500); }
+    .success-title { font-size: 18px; font-weight: 700; color: var(--tx-blue-950); }
+    .success-sub { font-size: 13px; color: var(--tx-gray-500); max-width: 280px; }
+
+    /* Error banner */
+    .error-banner {
+      display: none;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      background: rgba(220,38,38,0.06);
+      border: 1px solid rgba(220,38,38,0.3);
+      color: var(--tx-danger);
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+    .error-banner.visible { display: block; }
+
+    .footer-brand {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--tx-gray-200);
+    }
+    .footer-brand a {
+      color: var(--tx-gray-500);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .footer-brand a:hover { color: var(--tx-teal-500); }
+  </style>
+</head>
+<body>
+
+<div id="form-state">
+  <div class="widget-header">
+    <h2 id="widget-title">Fale connosco</h2>
+    <p id="widget-subtitle">Conta-nos o teu projecto. Respondemos em 24h.</p>
+  </div>
+
+  <div class="error-banner" id="error-banner"></div>
+
+  <form id="lead-form" novalidate>
+    <div class="two-col">
+      <div class="field">
+        <label for="name">Nome<span class="req">*</span></label>
+        <input type="text" id="name" name="name" placeholder="O teu nome" autocomplete="name">
+        <div class="field-error" id="err-name">Nome é obrigatório.</div>
+      </div>
+      <div class="field">
+        <label for="company">Empresa</label>
+        <input type="text" id="company" name="company" placeholder="Nome da empresa" autocomplete="organization">
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="field">
+        <label for="email">Email<span class="req">*</span></label>
+        <input type="email" id="email" name="email" placeholder="email@empresa.com" autocomplete="email">
+        <div class="field-error" id="err-email">Email válido é obrigatório.</div>
+      </div>
+      <div class="field">
+        <label for="phone">Telefone</label>
+        <input type="tel" id="phone" name="phone" placeholder="+351 9XX XXX XXX" autocomplete="tel">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="project_type">Tipo de projecto<span class="req">*</span></label>
+      <select id="project_type" name="project_type">
+        <option value="">Seleccionar...</option>
+        <option value="website">Website / Landing Page</option>
+        <option value="ecommerce">E-commerce</option>
+        <option value="webapp">Aplicação Web</option>
+        <option value="mobile">Aplicação Mobile</option>
+        <option value="saas">SaaS / Plataforma</option>
+        <option value="integration">Integração / Automação</option>
+        <option value="other">Outro</option>
+      </select>
+      <div class="field-error" id="err-project_type">Selecciona o tipo de projecto.</div>
+    </div>
+
+    <div class="field">
+      <label for="budget">Orçamento estimado</label>
+      <select id="budget" name="budget">
+        <option value="">Prefiro não indicar</option>
+        <option value="<5k">Menos de 5 000€</option>
+        <option value="5k-15k">5 000€ – 15 000€</option>
+        <option value="15k-50k">15 000€ – 50 000€</option>
+        <option value="50k+">Mais de 50 000€</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="message">Descrição do projecto</label>
+      <textarea id="message" name="message" placeholder="Descreve brevemente o que precisas..."></textarea>
+    </div>
+
+    <button type="submit" class="btn-submit" id="submit-btn">
+      <span class="spinner" id="spinner"></span>
+      <span id="btn-label">Enviar pedido</span>
+    </button>
+  </form>
+
+  <div class="footer-brand">
+    Powered by <a href="https://targx.pt" target="_blank" rel="noopener">TargX</a>
+  </div>
+</div>
+
+<div class="success-state" id="success-state">
+  <div class="success-icon">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color: var(--tx-teal-500)">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+  </div>
+  <div class="success-title">Pedido enviado!</div>
+  <div class="success-sub" id="success-message">Recebemos o teu contacto e respondemos em breve.</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Configuração ──────────────────────────────────────────────────────────
+  // Substituir pelo URL real da Edge Function após deploy
+  var ENDPOINT = 'https://siujvquuqdprhxvjyhjs.supabase.co/functions/v1/capture-website-lead';
+  var ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpdWp2cXV1cWRwcmh4dmp5aGpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MTIwOTIsImV4cCI6MjA5NzA4ODA5Mn0.dfF5FnaO8DOfSaFl9QwNwgu-bau3lbErYurBtxTEfX8';
+
+  // ── Parâmetros URL ────────────────────────────────────────────────────────
+  var params   = new URLSearchParams(window.location.search);
+  var partnerId = params.get('partner_id') || null;
+  var source    = params.get('source') || 'website';
+
+  // ── i18n mínimo ───────────────────────────────────────────────────────────
+  var lang = params.get('lang') || navigator.language.slice(0, 2) || 'pt';
+  var T = {
+    pt: {
+      title:    'Fale connosco',
+      subtitle: 'Conta-nos o teu projecto. Respondemos em 24h.',
+      submit:   'Enviar pedido',
+      sending:  'A enviar...',
+      success:  'Recebemos o teu contacto e respondemos nas próximas 24 horas.',
+      errGeneric: 'Ocorreu um erro. Tenta novamente ou contacta-nos directamente.',
+    },
+    en: {
+      title:    'Get in touch',
+      subtitle: 'Tell us about your project. We reply within 24h.',
+      submit:   'Send request',
+      sending:  'Sending...',
+      success:  'We received your message and will reply within 24 hours.',
+      errGeneric: 'Something went wrong. Please try again or contact us directly.',
+    },
+  };
+  var t = T[lang] || T['pt'];
+
+  document.getElementById('widget-title').textContent   = t.title;
+  document.getElementById('widget-subtitle').textContent = t.subtitle;
+  document.getElementById('btn-label').textContent       = t.submit;
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function val(id) { return document.getElementById(id).value.trim(); }
+  function setErr(id, visible) {
+    var el = document.getElementById(id);
+    el.classList.toggle('visible', visible);
+    document.getElementById(el.dataset.field || id.replace('err-', '')).classList.toggle('error', visible);
+  }
+
+  function validate() {
+    var ok = true;
+    var name = val('name');
+    var email = val('email');
+    var proj  = val('project_type');
+
+    var nameErr = !name;
+    var emailErr = !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    var projErr  = !proj;
+
+    document.getElementById('err-name').classList.toggle('visible', nameErr);
+    document.getElementById('name').classList.toggle('error', nameErr);
+    document.getElementById('err-email').classList.toggle('visible', emailErr);
+    document.getElementById('email').classList.toggle('error', emailErr);
+    document.getElementById('err-project_type').classList.toggle('visible', projErr);
+    document.getElementById('project_type').classList.toggle('error', projErr);
+
+    if (nameErr || emailErr || projErr) ok = false;
+    return ok;
+  }
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+  document.getElementById('lead-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var banner  = document.getElementById('error-banner');
+    banner.classList.remove('visible');
+
+    if (!validate()) return;
+
+    var btn     = document.getElementById('submit-btn');
+    var spinner = document.getElementById('spinner');
+    var label   = document.getElementById('btn-label');
+
+    btn.disabled       = true;
+    spinner.style.display = 'block';
+    label.textContent  = t.sending;
+
+    var payload = {
+      name:         val('name'),
+      email:        val('email'),
+      company:      val('company')  || undefined,
+      phone:        val('phone')    || undefined,
+      project_type: val('project_type'),
+      budget:       val('budget')   || undefined,
+      message:      val('message')  || undefined,
+      source:       source,
+      partner_id:   partnerId || undefined,
+    };
+
+    // Remove undefined keys
+    Object.keys(payload).forEach(function (k) {
+      if (payload[k] === undefined) delete payload[k];
+    });
+
+    fetch(ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': ANON_KEY,
+        'Authorization': 'Bearer ' + ANON_KEY,
+      },
+      body: JSON.stringify(payload),
+    })
+    .then(function (res) {
+      if (!res.ok) {
+        return res.json().then(function (data) {
+          throw new Error(data.error || t.errGeneric);
+        });
+      }
+      return res.json();
+    })
+    .then(function () {
+      document.getElementById('form-state').style.display = 'none';
+      var ss = document.getElementById('success-state');
+      ss.style.display = 'flex';
+      document.getElementById('success-message').textContent = t.success;
+
+      // Notify parent frame if embedded
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'targx-lead-submitted', source: source }, '*');
+      }
+    })
+    .catch(function (err) {
+      banner.textContent = err.message || t.errGeneric;
+      banner.classList.add('visible');
+      btn.disabled          = false;
+      spinner.style.display = 'none';
+      label.textContent     = t.submit;
+    });
+  });
+
+  // Clear errors on input
+  ['name', 'email', 'project_type'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', function () {
+      this.classList.remove('error');
+      var errEl = document.getElementById('err-' + id);
+      if (errEl) errEl.classList.remove('visible');
+      document.getElementById('error-banner').classList.remove('visible');
+    });
+  });
+})();
+</script>
+</body>
+</html>

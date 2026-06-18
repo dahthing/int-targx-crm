@@ -25,83 +25,82 @@ import { ClientFormComponent } from '../client-form/client-form.component';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TableModule, ButtonModule, InputTextModule, FormsModule, ClientFormComponent],
+  styles: [`
+    .clients-page { padding:24px; }
+    .clients-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+    .clients-search { margin-bottom:16px; }
+    .client-name { font-weight:500; color:var(--tx-gray-800); }
+    .col-meta { color:var(--tx-gray-500); font-size:0.8125rem; }
+    .col-date { color:var(--tx-gray-400); font-size:0.8125rem; }
+    .tx-badge-gray { background:var(--tx-gray-100); color:var(--tx-gray-700); }
+  `],
   template: `
-    <div class="p-6">
-      <div class="tx-card">
-        <div class="tx-card-header">
-          <h1 class="text-xl font-semibold" style="color: var(--text-primary)">Clientes</h1>
-          <button class="tx-btn-primary" (click)="openForm()">
-            <i class="pi pi-plus" style="margin-right: 6px"></i>
-            Novo cliente
-          </button>
-        </div>
+    <div class="clients-page">
+      <div class="clients-header">
+        <h1 class="page-title">Clientes</h1>
+        <button class="tx-btn-primary" (click)="openForm()">
+          <i class="pi pi-plus" style="margin-right:6px"></i>Novo cliente
+        </button>
+      </div>
 
-        <div style="margin-bottom: 16px">
+      <div class="tx-card">
+        <div class="clients-search">
           <input
             class="tx-input"
             type="text"
             placeholder="Pesquisar por nome ou NIF…"
             [(ngModel)]="searchValue"
             (ngModelChange)="onSearch($event)"
-            style="width: 100%; max-width: 360px"
+            style="width:100%;max-width:360px"
           />
         </div>
 
-        <div class="tx-table">
-          <p-table
-            [value]="clients()"
-            [loading]="loading()"
-            [rows]="20"
-            [paginator]="true"
-            [rowHover]="true"
-            styleClass="p-datatable-sm"
-            (onRowSelect)="onRowClick($event.data)"
-            selectionMode="single"
-          >
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Nome</th>
-                <th>Sector</th>
-                <th>Email</th>
-                <th>Telefone</th>
-                <th>Data de criação</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-client>
-              <tr
-                style="cursor: pointer"
-                (click)="onRowClick(client)"
-              >
-                <td>
-                  <span style="font-weight: 500; color: var(--text-primary)">{{ client.name }}</span>
-                </td>
-                <td>
-                  @if (client.sector) {
-                    <span class="tx-badge">{{ client.sector }}</span>
-                  } @else {
-                    <span style="color: var(--text-muted)">—</span>
-                  }
-                </td>
-                <td style="color: var(--text-secondary)">{{ client.email ?? '—' }}</td>
-                <td style="color: var(--text-secondary)">{{ client.phone ?? '—' }}</td>
-                <td style="color: var(--text-muted); font-size: 0.75rem">
-                  {{ formatDate(client.created_at) }}
-                </td>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="emptymessage">
-              <tr>
-                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px 0">
+        <p-table
+          [value]="clients()"
+          [loading]="loading()"
+          [rows]="20"
+          [paginator]="true"
+          [rowHover]="true"
+          styleClass="tx-table"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Nome</th>
+              <th>Sector</th>
+              <th>Email</th>
+              <th>Telefone</th>
+              <th>Criado em</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-client>
+            <tr style="cursor:pointer" (click)="onRowClick(client)">
+              <td><span class="client-name">{{ client.name }}</span></td>
+              <td>
+                @if (client.sector) {
+                  <span class="tx-badge tx-badge-gray">{{ client.sector }}</span>
+                } @else {
+                  <span class="col-meta">—</span>
+                }
+              </td>
+              <td class="col-meta">{{ client.email ?? '—' }}</td>
+              <td class="col-meta">{{ client.phone ?? '—' }}</td>
+              <td class="col-date">{{ formatDate(client.created_at) }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="5">
+                <div class="empty-state">
                   @if (loading()) {
-                    A carregar clientes…
+                    <span>A carregar clientes…</span>
                   } @else {
-                    Nenhum cliente encontrado.
+                    <span>Nenhum cliente encontrado.</span>
                   }
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </div>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
       </div>
     </div>
 
@@ -180,7 +179,12 @@ export class ClientListComponent implements OnInit {
     this.formVisible.set(false);
     this.clients.update(list => {
       const idx = list.findIndex(c => c.id === client.id);
-      return idx >= 0 ? list.with(idx, client) : [client, ...list];
+      if (idx >= 0) {
+        const next = [...list];
+        next[idx] = client;
+        return next;
+      }
+      return [client, ...list];
     });
   }
 

@@ -2,11 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   input,
   OnInit,
   signal,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TableModule } from 'primeng/table';
@@ -26,7 +28,7 @@ interface HoursEntry {
   selector: 'app-hours-log',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TableModule, ToastModule],
+  imports: [FormsModule, TableModule, ToastModule, DecimalPipe],
   providers: [MessageService],
   template: `
     <p-toast />
@@ -187,7 +189,7 @@ export class HoursLogComponent implements OnInit {
   readonly #projectService = inject(ProjectService);
   readonly #authService = inject(AuthService);
   readonly #messageService = inject(MessageService);
-  readonly #destroyed = takeUntilDestroyed();
+  readonly #destroyRef = inject(DestroyRef);
 
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -221,7 +223,10 @@ export class HoursLogComponent implements OnInit {
 
   #loadEntries(): void {
     this.loading.set(true);
-    this.#projectService.getHoursLog(this.projectId()).pipe(this.#destroyed).subscribe({
+    this.#projectService
+      .getHoursLog(this.projectId())
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe({
       next: (data) => {
         this.entries.set(data);
         this.loading.set(false);
@@ -250,7 +255,7 @@ export class HoursLogComponent implements OnInit {
         hours: this.form.hours,
         user_id: userId,
       })
-      .pipe(this.#destroyed)
+      .pipe(takeUntilDestroyed(this.#destroyRef))
       .subscribe({
         next: () => {
           this.#messageService.add({ severity: 'success', summary: 'Registado', detail: 'Horas guardadas.' });

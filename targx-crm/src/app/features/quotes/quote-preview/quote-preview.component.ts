@@ -8,8 +8,13 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { QuoteService } from '../../../core/services/quote.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { SUPABASE_CLIENT } from '../../../core/supabase/supabase.client';
+import { PdfRendererService } from '../../../core/services/pdf-renderer.service';
+import { environment } from '../../../../environments/environment';
 import { calculateItemSubtotal, calculateQuoteTotals } from '../../../core/services/quote-calculator.functions';
 import type { QuoteItem, QuotePhase } from '../../../core/models/quote.model';
 import type { QuoteWithPhases } from '../../../core/services/quote.service';
@@ -18,8 +23,10 @@ import type { QuoteWithPhases } from '../../../core/services/quote.service';
   selector: 'app-quote-preview',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [CommonModule, ToastModule],
+  providers: [MessageService],
   template: `
+    <p-toast />
     <div class="tx-page-content">
       <!-- Toolbar -->
       <div class="flex items-center justify-between mb-6 print:hidden">
@@ -27,28 +34,38 @@ import type { QuoteWithPhases } from '../../../core/services/quote.service';
           <i class="pi pi-arrow-left mr-2"></i>Voltar ao editor
         </button>
 
-        @if (isAdmin()) {
-          <div class="flex gap-2">
+        <div class="flex gap-2">
+          @if (quote()?.client_accept_token) {
             <button
               class="tx-btn-secondary"
-              disabled
-              title="Disponível na Fase 4"
-              aria-label="Gerar PDF (indisponível)"
+              (click)="openClientPortal()"
+              aria-label="Ver portal do cliente"
+            >
+              <i class="pi pi-external-link mr-2"></i>Ver portal do cliente
+            </button>
+          }
+          @if (isAdmin()) {
+            <button
+              class="tx-btn-secondary"
+              (click)="generatePdf()"
+              aria-label="Gerar PDF"
             >
               <i class="pi pi-file-pdf mr-2"></i>Gerar PDF
-              <span class="ml-2 text-body-sm text-[var(--tx-gray-400)]">(Fase 4)</span>
             </button>
             <button
-              class="tx-btn-secondary"
-              disabled
-              title="Disponível na Fase 5"
-              aria-label="Enviar ao cliente (indisponível)"
+              class="tx-btn-primary"
+              [disabled]="sendingToClient() || !canSend()"
+              (click)="sendToClient()"
+              aria-label="Enviar ao cliente"
             >
-              <i class="pi pi-send mr-2"></i>Enviar ao cliente
-              <span class="ml-2 text-body-sm text-[var(--tx-gray-400)]">(Fase 5)</span>
+              @if (sendingToClient()) {
+                <i class="pi pi-spin pi-spinner mr-2"></i>A enviar...
+              } @else {
+                <i class="pi pi-send mr-2"></i>Enviar ao cliente
+              }
             </button>
-          </div>
-        }
+          }
+        </div>
       </div>
 
       @if (loading()) {
@@ -163,7 +180,7 @@ import type { QuoteWithPhases } from '../../../core/services/quote.service';
                     <dd class="font-mono text-[var(--tx-gray-950)]">{{ formatCurrency(totals().risk_adjustment) }}</dd>
                   </div>
                 }
-                @if ((quote()!.discount_pct ?? 0) > 0) {
+                @if (quote()!.discount_pct > 0) {
                   <div class="flex justify-between">
                     <dt class="text-[var(--tx-gray-600)]">Desconto ({{ quote()!.discount_pct }}%)</dt>
                     <dd class="font-mono text-[var(--tx-gray-950)]">-{{ formatCurrency(totals().discount_amount) }}</dd>
@@ -204,12 +221,21 @@ import type { QuoteWithPhases } from '../../../core/services/quote.service';
 export class QuotePreviewComponent implements OnInit {
   readonly #quoteService = inject(QuoteService);
   readonly #authService = inject(AuthService);
+  readonly #supabase = inject(SUPABASE_CLIENT);
+  readonly #pdfRenderer = inject(PdfRendererService);
+  readonly #messageService = inject(MessageService);
   readonly #route = inject(ActivatedRoute);
   readonly #router = inject(Router);
 
   readonly loading = signal(true);
   readonly quote = signal<QuoteWithPhases | null>(null);
+  readonly sendingToClient = signal(false);
+
   readonly isAdmin = computed(() => this.#authService.role() === 'admin');
+  readonly canSend = computed(() => {
+    const q = this.quote();
+    return !!q && ['aprovado', 'em_revisao'].includes(q.status);
+  });
 
   readonly totals = computed(() => {
     const q = this.quote();
@@ -233,6 +259,53 @@ export class QuotePreviewComponent implements OnInit {
       this.quote.set(q ?? null);
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  async generatePdf(): Promise<void> {
+    const q = this.quote();
+    if (!q) return;
+    try {
+      const [{ data: clientData }, { data: partnerData }] = await Promise.all([
+        this.#supabase.from('clients').select('id, name, email, company').eq('id', q.client_id).single(),
+        this.#supabase.from('profiles').select('id, full_name, email, role').eq('id', q.partner_id).single(),
+      ]);
+      await this.#pdfRenderer.openPrintPreview(
+        q,
+        clientData ?? { name: 'Cliente', company: null, email: null },
+        partnerData ?? { id: q.partner_id, full_name: 'TargX', email: 'hello@targx.pt', role: 'partner' },
+      );
+    } catch (err) {
+      this.#messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível gerar o PDF.' });
+      console.error('[generatePdf]', err);
+    }
+  }
+
+  async sendToClient(): Promise<void> {
+    const id = this.quote()?.id;
+    if (!id || this.sendingToClient()) return;
+    this.sendingToClient.set(true);
+    try {
+      const { error } = await this.#supabase.functions.invoke('send-quote-to-client', {
+        body: { quoteId: id },
+      });
+      if (error) throw error;
+      this.#messageService.add({ severity: 'success', summary: 'Enviado', detail: 'Orçamento enviado ao cliente com sucesso.' });
+      // Reload quote to get updated status + token
+      const q = await this.#quoteService.getById(id).toPromise();
+      this.quote.set(q ?? null);
+    } catch (err) {
+      this.#messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível enviar ao cliente.' });
+      console.error('[sendToClient]', err);
+    } finally {
+      this.sendingToClient.set(false);
+    }
+  }
+
+  openClientPortal(): void {
+    const token = this.quote()?.client_accept_token;
+    if (token) {
+      window.open(`${environment.clientPortalBaseUrl}/${token}`, '_blank', 'noopener,noreferrer');
     }
   }
 

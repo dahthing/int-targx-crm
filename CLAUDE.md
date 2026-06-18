@@ -191,4 +191,7 @@ PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 Supabase
 m$f!b4-32$c8WmU
 
+resend
+re_QoodXNSS_GpvoDCf1Z6SMpnR6Yo8iU4EW
+
 *TargX CRM CLAUDE.md — actualizado Junho 2026*
